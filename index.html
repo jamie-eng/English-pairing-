@@ -79,7 +79,7 @@
         .input-group { position: relative; margin-bottom: 16px; text-align: left; }
         .input-group label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 14px 16px;
             background: #fafafa;
@@ -150,6 +150,15 @@
         .error-msg { color: #d93838; font-size: 12px; text-align: center; margin-bottom: 15px; font-weight: 500; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        textarea { resize: none; height: 80px; }
+        .avatar { width: 64px; height: 64px; border-radius: 50%; background: #eee center/cover; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 22px; color: #666; flex: none; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip { padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border-color); background: #fff; font-size: 13px; cursor: pointer; }
+        .chip.on { background: var(--btn-bg); color: var(--btn-text); border-color: var(--btn-bg); }
+        .btn-small { display: inline-block; padding: 6px 12px; font-size: 12px; background: #f0f0f0; color: #111; border: none; border-radius: 6px; cursor: pointer; }
+        .box { background: #fafafa; border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
+        .box .t { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+        .rec { font-size: 13px; line-height: 1.4; padding: 8px 0; border-top: 1px solid var(--border-color); }
     </style>
 </head>
 <body id="main-body">
@@ -252,6 +261,27 @@
             </div>
         </div>
 
+        <!-- PROFILE SCREEN -->
+        <div id="profile-screen" class="slide hidden">
+            <div class="top-nav"><a href="#" id="profile-back" onclick="event.preventDefault(); closeProfile()">← Back</a></div>
+            <h1 id="profile-title" style="text-align:left; margin-bottom:16px; font-size:20px;">Your profile</h1>
+            <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+                <div id="pf-pic" class="avatar"></div>
+                <label class="btn-small" for="pf-file">Change photo</label>
+                <input type="file" id="pf-file" accept="image/*" hidden>
+            </div>
+            <div class="input-group"><label for="pf-name">Name</label><input id="pf-name" maxlength="40"></div>
+            <div class="input-group"><label for="pf-bio">Bio</label><textarea id="pf-bio" maxlength="160" placeholder="Tell us about yourself"></textarea></div>
+            <div class="input-group"><label for="pf-country">Country</label><input id="pf-country" list="countries" placeholder="Type or pick">
+                <datalist id="countries"><option>Malaysia<option>Singapore<option>Indonesia<option>Brunei<option>Thailand<option>Philippines<option>Vietnam<option>India<option>China<option>Japan<option>South Korea<option>Australia<option>United Kingdom<option>United States<option>Canada</datalist></div>
+            <div class="input-group"><label for="pf-gender">Gender</label>
+                <select id="pf-gender"><option value="">Prefer not to say</option><option>Female</option><option>Male</option><option>Non-binary</option></select></div>
+            <div class="input-group"><label>English level</label><div id="pf-levels" class="chips"></div><p id="lvl-hint" style="font-size:12px; color:var(--text-muted); margin:8px 0 0; padding:0;"></p></div>
+            <div class="input-group"><label>Hobbies (pick any)</label><div id="pf-hobbies" class="chips"></div></div>
+            <div id="pf-error" class="error-msg"></div>
+            <button class="btn-primary" onclick="saveProfile()">Save</button>
+        </div>
+
         <!-- MAIN APP DASHBOARD -->
         <div id="app-screen" class="slide hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -259,7 +289,16 @@
                 <button onclick="handleLogout()" style="width: auto; padding: 6px 12px; font-size: 12px; background: #f0f0f0; color: #111; border: none; border-radius: 6px; cursor: pointer;">Log Out</button>
             </div>
             
-            <p id="user-info-display" style="color: var(--text-muted); font-size: 13px; text-align: left; margin-bottom: 20px;"></p>
+            <div style="display:flex; gap:14px; align-items:center; margin-bottom:10px; text-align:left;">
+                <div id="dash-pic" class="avatar"></div>
+                <div style="min-width:0;">
+                    <p id="user-info-display" style="font-weight:600; font-size:15px; margin:0; padding:0; color:var(--text-main);"></p>
+                    <p id="dash-meta" style="font-size:12px; color:var(--text-muted); margin:2px 0 0; padding:0;"></p>
+                </div>
+            </div>
+            <p id="dash-bio" style="font-size:13px; text-align:left; margin:0 0 10px; padding:0;"></p>
+            <button class="btn-small" style="margin-bottom:20px;" onclick="openProfile(false)">Edit profile</button>
+            <div class="box"><p class="t">Picked for you today</p><div id="recs-list"></div></div>
             
             <div style="background: #fafafa; border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; margin-bottom: 20px; text-align: left;">
                 <p style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px;">Daily Exercise</p>
@@ -285,7 +324,7 @@
     <!-- FIREBASE LOGIC -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { initializeAuth, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, browserPopupRedirectResolver, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { initializeAuth, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, browserPopupRedirectResolver, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -346,6 +385,9 @@
                 'auth/wrong-password': 'Incorrect email or password.',
                 'auth/too-many-requests': 'Too many attempts. Please try again later.',
                 'auth/network-request-failed': 'Network error. Check your connection.',
+                'auth/unauthorized-domain': 'This website address is not authorized. In Firebase: Authentication > Settings > Authorized domains, add your github.io domain.',
+                'auth/operation-not-allowed': 'This sign-in method is not enabled. In Firebase: Authentication > Sign-in method, enable it.',
+                'auth/popup-blocked': 'The Google popup was blocked. Allow popups for this site and try again.',
                 'auth/popup-closed-by-user': '',
                 'auth/cancelled-popup-request': ''
             };
@@ -408,11 +450,11 @@
             try {
                 if (isLoginMode) {
                     const cred = await signInWithEmailAndPassword(auth, email, password);
-                    showApp(cred.user);
+                    await enter(cred.user);
                 } else {
                     const name = document.getElementById('display-name').value.trim() || 'User';
                     const cred = await createUserWithEmailAndPassword(auth, email, password);
-                    showApp(cred.user, name);
+                    window._pendingName = name; await enter(cred.user);
                     // Saving the profile must not break login if Firestore is not set up
                     try {
                         await setDoc(doc(db, "users", cred.user.uid), {
@@ -439,7 +481,7 @@
             try {
                 const result = await signInWithPopup(auth, googleProvider);
                 const user = result.user;
-                showApp(user, user.displayName);
+                enter(user);
                 try {
                     const userDocRef = doc(db, "users", user.uid);
                     const userDoc = await getDoc(userDocRef);
@@ -453,7 +495,12 @@
                 } catch (e) {
                     console.error('Could not save profile (check Firestore rules):', e);
                 }
-            } catch (error) {
+            } catch (err) {
+                let error = err;
+                // Some phones/in-app browsers cannot open popups: fall back to a full-page redirect
+                if (['auth/popup-blocked', 'auth/operation-not-supported-in-this-environment'].includes(error.code)) {
+                    try { await signInWithRedirect(auth, googleProvider); return; } catch (e) { error = e; }
+                }
                 errorEl.innerText = friendlyError(error);
             }
         }
@@ -461,22 +508,14 @@
         window.handleLogout = async function() {
             try { await signOut(auth); } catch (e) { console.error(e); }
             document.getElementById('password').value = '';
+            profile = {};
             window.nextSlide(1);
         }
 
         onAuthStateChanged(auth, async (user) => {
-            const appScreen = document.getElementById('app-screen');
             if (user) {
-                showApp(user);
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists() && userDoc.data().name) {
-                        document.getElementById('user-info-display').innerText = `Logged in as ${userDoc.data().name}`;
-                    }
-                } catch (e) {
-                    console.error('Could not load profile:', e);
-                }
-            } else if (!appScreen.classList.contains('hidden')) {
+                await enter(user);
+            } else if (['app', 'profile'].includes(currentSlideNum)) {
                 window.nextSlide(1);
             }
         });
@@ -516,19 +555,138 @@
             }
         }
 
+        const $ = id => document.getElementById(id);
+        const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+        const LEVEL_NAMES = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Proficient' };
+        const HOBBIES = { Music: ['🎵', 'music and song lyrics'], Gaming: ['🎮', 'video games'], Sports: ['⚽', 'sports'], Movies: ['🎬', 'films and series'], Reading: ['📚', 'books'], Travel: ['✈️', 'travel'], Cooking: ['🍳', 'food and cooking'], Art: ['🎨', 'art and design'], Tech: ['💻', 'technology'], Fashion: ['👗', 'fashion and style'] };
+        let profile = {}, curUser = null, selLevel = '', selHobbies = new Set(), pendingPic = '';
+        const bandOf = l => ({ A1: 'A', A2: 'A', B1: 'B', B2: 'B', C1: 'C', C2: 'C' }[l] || 'B');
+
+        function setAvatar(el, pic, name) {
+            el.style.backgroundImage = pic ? `url(${pic})` : '';
+            el.textContent = pic ? '' : (name || '?').charAt(0).toUpperCase();
+        }
+
+        async function loadProfile(user) {
+            let local = {};
+            try { local = JSON.parse(localStorage.getItem('sh_' + user.uid)) || {}; } catch (e) {}
+            let remote = {};
+            try {
+                const snap = await Promise.race([getDoc(doc(db, 'users', user.uid)), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000))]);
+                if (snap.exists()) remote = snap.data();
+            } catch (e) { console.error('Profile load:', e); }
+            profile = { ...local, ...remote };
+            if (!profile.name && window._pendingName) profile.name = window._pendingName;
+        }
+
+        async function enter(user) {
+            curUser = user;
+            await loadProfile(user);
+            profile.level ? renderDashboard() : openProfile(true);
+        }
+
+        function recommendations() {
+            const hs = profile.hobbies || [];
+            if (!hs.length) return [];
+            const day = Math.floor(Date.now() / 864e5);
+            const T = {
+                A: [h => `Learn 10 simple words about ${h}`, h => `Describe your favourite thing about ${h} in 5 short sentences`, h => `Watch a slow, easy video about ${h} and note 5 words`],
+                B: [h => `Read a short article about ${h} and summarise it in 3 sentences`, h => `Write 100 words giving your opinion on ${h}, with 2 reasons`, h => `Watch a video about ${h} and practise 5 new phrases`],
+                C: [h => `Write a 200-word argument about a debated issue in ${h}`, h => `Read an in-depth piece on ${h} and collect 8 advanced collocations`, h => `Record a 2-minute talk critiquing a trend in ${h}`]
+            }[bandOf(profile.level)];
+            return T.map((f, i) => { const h = HOBBIES[hs[(day + i) % hs.length]]; return `${h[0]} ${f(h[1])}`; });
+        }
+
+        function renderDashboard() {
+            showApp(curUser, profile.name);
+            const name = profile.name || curUser.displayName || curUser.email;
+            $('user-info-display').innerText = name;
+            $('dash-meta').innerText = [`${profile.level} · ${LEVEL_NAMES[profile.level]}`, profile.country, profile.gender].filter(Boolean).join(' · ');
+            $('dash-bio').innerText = profile.bio || '';
+            setAvatar($('dash-pic'), profile.pic, name);
+            $('recs-list').innerHTML = recommendations().map(r => `<div class="rec">${r}</div>`).join('');
+        }
+
+        window.openProfile = function(first) {
+            currentSlideNum = 'profile';
+            document.querySelectorAll('.slide').forEach(el => el.classList.add('hidden'));
+            $('profile-screen').classList.remove('hidden');
+            $('profile-title').innerText = first ? 'Set up your profile' : 'Edit profile';
+            $('profile-back').style.display = first ? 'none' : '';
+            const name = profile.name || curUser.displayName || '';
+            $('pf-name').value = name;
+            $('pf-bio').value = profile.bio || '';
+            $('pf-country').value = profile.country || '';
+            $('pf-gender').value = profile.gender || '';
+            pendingPic = '';
+            setAvatar($('pf-pic'), profile.pic, name);
+            selLevel = profile.level || '';
+            selHobbies = new Set(profile.hobbies || []);
+            $('pf-error').innerText = '';
+            paintChips();
+        }
+
+        window.closeProfile = function() { if (profile.level) renderDashboard(); }
+
+        function paintChips() {
+            $('pf-levels').innerHTML = LEVELS.map(l => `<button type="button" class="chip${l === selLevel ? ' on' : ''}" data-l="${l}">${l}</button>`).join('');
+            $('pf-hobbies').innerHTML = Object.keys(HOBBIES).map(h => `<button type="button" class="chip${selHobbies.has(h) ? ' on' : ''}" data-h="${h}">${HOBBIES[h][0]} ${h}</button>`).join('');
+            $('lvl-hint').innerText = selLevel ? LEVEL_NAMES[selLevel] : 'Not sure? Pick the closest one.';
+        }
+
+        $('profile-screen').addEventListener('click', e => {
+            const b = e.target.closest('.chip');
+            if (!b) return;
+            if (b.dataset.l) selLevel = b.dataset.l;
+            else selHobbies.has(b.dataset.h) ? selHobbies.delete(b.dataset.h) : selHobbies.add(b.dataset.h);
+            paintChips();
+        });
+
+        $('pf-file').addEventListener('change', e => {
+            const f = e.target.files[0];
+            if (!f) return;
+            const img = new Image();
+            img.onload = () => {
+                const c = document.createElement('canvas'); c.width = c.height = 160;
+                const m = Math.min(img.width, img.height);
+                c.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, 160, 160);
+                pendingPic = c.toDataURL('image/jpeg', 0.8);
+                setAvatar($('pf-pic'), pendingPic, $('pf-name').value);
+            };
+            img.src = URL.createObjectURL(f);
+        });
+
+        window.saveProfile = function() {
+            if (!selLevel) { $('pf-error').innerText = 'Please pick your English level.'; return; }
+            if (!selHobbies.size) { $('pf-error').innerText = 'Please pick at least one hobby.'; return; }
+            profile = { ...profile,
+                name: $('pf-name').value.trim() || curUser.displayName || 'User',
+                bio: $('pf-bio').value.trim(), country: $('pf-country').value.trim(), gender: $('pf-gender').value,
+                level: selLevel, hobbies: [...selHobbies], pic: pendingPic || profile.pic || '' };
+            try { localStorage.setItem('sh_' + curUser.uid, JSON.stringify(profile)); } catch (e) {}
+            setDoc(doc(db, 'users', curUser.uid), { ...profile, email: curUser.email }, { merge: true }).catch(e => console.error('Profile save:', e));
+            renderDashboard();
+        }
+
+        const QUIZ = {
+            A: ['She go to school every day.', 'She goes to school every day.'],
+            B: ['If I would have time, I would help you.', 'If I had time, I would help you.'],
+            C: ['I think this is okay.', 'It is strongly my contention that...']
+        };
+
         function loadDrill() {
-            document.getElementById('quiz-feedback').innerText = '';
-            document.getElementById('quiz-question').innerText = "Choose the correct phrase configuration:";
-            document.getElementById('quiz-options').innerHTML = `
-                <button class="btn-primary" style="background:#fff; color:#111; border:1px solid #ddd; margin-bottom:8px; font-weight:normal;" onclick="checkDrill(false)">A) I think this is okay.</button>
-                <button class="btn-primary" style="background:#fff; color:#111; border:1px solid #ddd; margin-bottom:8px; font-weight:normal;" onclick="checkDrill(true)">B) It is strongly my contention that...</button>
-            `;
+            $('quiz-feedback').innerText = '';
+            $('quiz-question').innerText = 'Choose the correct or more formal sentence:';
+            const q = QUIZ[bandOf(profile.level)];
+            const opts = Math.floor(Date.now() / 864e5) % 2 ? [[q[1], true], [q[0], false]] : [[q[0], false], [q[1], true]];
+            $('quiz-options').innerHTML = opts.map((o, i) =>
+                `<button class="btn-primary" style="background:#fff; color:#111; border:1px solid #ddd; margin-bottom:8px; font-weight:normal;" onclick="checkDrill(${o[1]})">${'AB'[i]}) ${o[0]}</button>`).join('');
         }
 
         window.checkDrill = function(isCorrect) {
-            const fb = document.getElementById('quiz-feedback');
+            const fb = $('quiz-feedback');
             fb.style.color = isCorrect ? '#111' : '#d93838';
-            fb.innerText = isCorrect ? 'Correct! Formal structure verified.' : 'Incorrect. Try selecting an academic option.';
+            fb.innerText = isCorrect ? 'Correct! Nice work.' : 'Not quite. Try the other option.';
         }
     </script>
 </body>
