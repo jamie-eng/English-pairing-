@@ -159,6 +159,19 @@
         .box { background: #fafafa; border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; margin-bottom: 20px; text-align: left; }
         .box .t { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
         .rec { font-size: 13px; line-height: 1.4; padding: 8px 0; border-top: 1px solid var(--border-color); }
+        .slide .sub { font-size: 13px; color: var(--text-muted); text-align: left; margin: 0 0 14px; padding: 0; }
+        #nav { position: fixed; bottom: 0; left: 0; right: 0; display: flex; justify-content: space-around; background: var(--bg-color); border-top: 1px solid var(--border-color); padding: 8px 0 10px; z-index: 9; }
+        #nav button { background: none; border: none; font-size: 11px; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+        #nav button b { font-size: 20px; font-weight: 400; }
+        #nav button.on { color: var(--text-main); font-weight: 600; }
+        .container { padding-bottom: 90px; }
+        .msg { padding: 8px 12px; border-radius: 12px; background: #f0f0f0; margin: 6px 0; font-size: 13px; text-align: left; max-width: 85%; }
+        .msg.me { background: var(--btn-bg); color: var(--btn-text); margin-left: auto; }
+        #msgs { height: 340px; overflow-y: auto; margin-bottom: 10px; }
+        [data-theme=dark] { --bg-color: #000; --text-main: #fff; --text-muted: #aaa; --border-color: #333; --btn-bg: #fff; --btn-text: #000; }
+        [data-theme=dark] .container, [data-theme=dark] input, [data-theme=dark] select, [data-theme=dark] textarea, [data-theme=dark] .box, [data-theme=dark] .chip, [data-theme=dark] .btn-small, [data-theme=dark] .btn-google, [data-theme=dark] .msg, [data-theme=dark] [style*="#fafafa"] { background: #111 !important; color: #fff; }
+        [data-theme=dark] .chip.on, [data-theme=dark] .msg.me { background: #fff !important; color: #000; }
+        [data-theme=dark] .btn-primary[style*="background:#fff"] { background: #111 !important; color: #fff !important; border-color: #333 !important; }
     </style>
 </head>
 <body id="main-body">
@@ -261,6 +274,49 @@
             </div>
         </div>
 
+        <!-- MATCH -->
+        <div id="match-screen" class="slide hidden">
+            <h1 style="text-align:left; font-size:20px; margin-bottom:6px;">Study partner</h1>
+            <p class="sub">Matched live by level and hobbies. Chat, then start a video call.</p>
+            <div class="box"><p id="match-status" style="font-size:13px; margin:0; padding:0;">Tap the button to find someone online now.</p></div>
+            <button class="btn-primary" onclick="findMatch()">Find a partner</button>
+            <div class="box" style="margin-top:24px;"><p class="t">Book clubs</p>
+                <div id="club-list"></div>
+                <div class="input-group" style="margin-top:12px;"><input id="club-title" maxlength="60" placeholder="Book, e.g. English Grammar in Use (C1)"></div>
+                <button class="btn-small" onclick="createClub()">Start a club</button></div>
+        </div>
+
+        <!-- CHAT -->
+        <div id="chat-screen" class="slide hidden">
+            <div class="top-nav"><a href="#" onclick="event.preventDefault(); tab('match')">← Back</a><a id="call-link" target="_blank" rel="noopener" href="#">📹 Video call</a></div>
+            <h1 id="chat-title" style="text-align:left; font-size:18px; margin-bottom:10px;"></h1>
+            <div id="msgs"></div>
+            <div style="display:flex; gap:8px;"><input id="msg-in" placeholder="Type a message" maxlength="500"><button class="btn-small" onclick="sendMsg()">Send</button></div>
+        </div>
+
+        <!-- ZONES -->
+        <div id="zones-screen" class="slide hidden">
+            <h1 style="text-align:left; font-size:20px; margin-bottom:14px;">Zones</h1>
+            <div id="zone-grid"></div>
+            <div id="zone-view" style="display:none;">
+                <a href="#" onclick="event.preventDefault(); showZones()" style="font-size:13px; color:var(--text-muted);">← All zones</a>
+                <h1 id="z-title" style="text-align:left; font-size:18px; margin:10px 0 4px;"></h1>
+                <p id="z-desc" class="sub"></p>
+                <div class="input-group"><input id="z-t" placeholder="Title" maxlength="80"></div>
+                <div class="input-group"><textarea id="z-b" placeholder="Write here..." style="height:110px;"></textarea></div>
+                <div class="input-group" id="z-u-wrap"><input id="z-u" placeholder="Link (Google Drive / PDF), optional"></div>
+                <button class="btn-primary" onclick="addPost()">Post</button>
+                <div id="z-list" style="margin-top:16px;"></div>
+            </div>
+        </div>
+
+        <!-- RANK -->
+        <div id="rank-screen" class="slide hidden">
+            <h1 style="text-align:left; font-size:20px; margin-bottom:6px;">Leaderboard</h1>
+            <p class="sub">Streak kings. Check in or write a diary entry every day.</p>
+            <div id="rank-list"></div>
+        </div>
+
         <!-- PROFILE SCREEN -->
         <div id="profile-screen" class="slide hidden">
             <div class="top-nav"><a href="#" id="profile-back" onclick="event.preventDefault(); closeProfile()">← Back</a></div>
@@ -278,6 +334,8 @@
                 <select id="pf-gender"><option value="">Prefer not to say</option><option>Female</option><option>Male</option><option>Non-binary</option></select></div>
             <div class="input-group"><label>English level</label><div id="pf-levels" class="chips"></div><p id="lvl-hint" style="font-size:12px; color:var(--text-muted); margin:8px 0 0; padding:0;"></p></div>
             <div class="input-group"><label>Hobbies (pick any)</label><div id="pf-hobbies" class="chips"></div></div>
+            <div class="input-group"><label for="pf-ai">AI key (optional, stays on this device)</label><input id="pf-ai" type="password" autocomplete="off" placeholder="Paste your own API key"></div>
+            <button type="button" class="btn-small" style="margin-bottom:16px;" onclick="toggleTheme()">🌓 Light / Dark mode</button>
             <div id="pf-error" class="error-msg"></div>
             <button class="btn-primary" onclick="saveProfile()">Save</button>
         </div>
@@ -298,6 +356,8 @@
             </div>
             <p id="dash-bio" style="font-size:13px; text-align:left; margin:0 0 10px; padding:0;"></p>
             <button class="btn-small" style="margin-bottom:20px;" onclick="openProfile(false)">Edit profile</button>
+            <div class="box" style="display:flex; justify-content:space-between; align-items:center;"><span id="streak" style="font-weight:600; font-size:14px;"></span><button class="btn-small" onclick="checkIn()">Check in</button></div>
+            <div class="box"><p class="t">AI plan</p><button class="btn-small" onclick="askAI()">✨ Ask AI for today's plan</button><p id="ai-out" class="sub" style="margin:8px 0 0; white-space:pre-wrap;"></p></div>
             <div class="box"><p class="t">Picked for you today</p><div id="recs-list"></div></div>
             
             <div style="background: #fafafa; border: 1px solid var(--border-color); padding: 16px; border-radius: 12px; margin-bottom: 20px; text-align: left;">
@@ -309,6 +369,14 @@
         </div>
 
     </div>
+
+    <nav id="nav" class="hidden">
+        <button data-t="home" onclick="tab('home')"><b>🏠</b>Home</button>
+        <button data-t="match" onclick="tab('match')"><b>🤝</b>Match</button>
+        <button data-t="zones" onclick="tab('zones')"><b>📝</b>Zones</button>
+        <button data-t="rank" onclick="tab('rank')"><b>🔥</b>Rank</button>
+        <button data-t="profile" onclick="tab('profile')"><b>👤</b>Profile</button>
+    </nav>
 
     <script>
         // Fallback: replaced by the real functions once Firebase loads.
@@ -325,7 +393,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { initializeAuth, browserLocalPersistence, browserSessionPersistence, inMemoryPersistence, browserPopupRedirectResolver, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, signInWithRedirect, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, addDoc, collection, query, where, orderBy, limit, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyBaiSjLnTaVhLdwfsNA2Teb-8y5ITeBQfc",
@@ -352,6 +420,7 @@
 
         window.nextSlide = function(slideNum) {
             currentSlideNum = slideNum;
+            document.getElementById('nav')?.classList.add('hidden');
             document.querySelectorAll('.slide').forEach(s => s.classList.add('hidden'));
             document.getElementById(`slide-${slideNum}`)?.classList.remove('hidden');
         }
@@ -406,6 +475,7 @@
 
         window.showAuthScreen = function() {
             currentSlideNum = 'auth';
+            document.getElementById('nav')?.classList.add('hidden');
             document.querySelectorAll('.slide').forEach(s => s.classList.add('hidden'));
             document.getElementById('auth-screen').classList.remove('hidden');
         }
@@ -426,6 +496,7 @@
             document.getElementById('app-screen').classList.remove('hidden');
             document.getElementById('user-info-display').innerText = `Logged in as ${name || user.displayName || user.email}`;
             loadDrill();
+            $('nav').classList.remove('hidden'); setNav('home');
         }
 
         window.handleAuthSubmit = async function() {
@@ -558,7 +629,7 @@
         const $ = id => document.getElementById(id);
         const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
         const LEVEL_NAMES = { A1: 'Beginner', A2: 'Elementary', B1: 'Intermediate', B2: 'Upper intermediate', C1: 'Advanced', C2: 'Proficient' };
-        const HOBBIES = { Music: ['🎵', 'music and song lyrics'], Gaming: ['🎮', 'video games'], Sports: ['⚽', 'sports'], Movies: ['🎬', 'films and series'], Reading: ['📚', 'books'], Travel: ['✈️', 'travel'], Cooking: ['🍳', 'food and cooking'], Art: ['🎨', 'art and design'], Tech: ['💻', 'technology'], Fashion: ['👗', 'fashion and style'] };
+        const HOBBIES = { Music: ['🎵', 'music and song lyrics'], Gaming: ['🎮', 'video games'], Sports: ['⚽', 'sports'], Movies: ['🎬', 'films and series'], Reading: ['📚', 'books'], Travel: ['✈️', 'travel'], Cooking: ['🍳', 'food and cooking'], Art: ['🎨', 'art and design'], Tech: ['💻', 'technology'], Fashion: ['👗', 'fashion and style'], Anime: ['🍥', 'anime and manga'], 'K-pop': ['🎤', 'K-pop and Asian pop culture'], Photography: ['📷', 'photography'], Fitness: ['💪', 'fitness and health'], Dance: ['💃', 'dance'], Pets: ['🐶', 'pets and animals'], Nature: ['🌿', 'nature and the environment'], Science: ['🔬', 'science'], History: ['🏛️', 'history'], Business: ['💼', 'business and money'], Writing: ['✍️', 'creative writing'], Podcasts: ['🎧', 'podcasts'], Cars: ['🚗', 'cars'], Volunteering: ['🤲', 'volunteering'] };
         let profile = {}, curUser = null, selLevel = '', selHobbies = new Set(), pendingPic = '';
         const bandOf = l => ({ A1: 'A', A2: 'A', B1: 'B', B2: 'B', C1: 'C', C2: 'C' }[l] || 'B');
 
@@ -604,6 +675,7 @@
             $('dash-meta').innerText = [`${profile.level} · ${LEVEL_NAMES[profile.level]}`, profile.country, profile.gender].filter(Boolean).join(' · ');
             $('dash-bio').innerText = profile.bio || '';
             setAvatar($('dash-pic'), profile.pic, name);
+            $('streak').innerText = `🔥 ${profile.streak || 0} day streak`;
             $('recs-list').innerHTML = recommendations().map(r => `<div class="rec">${r}</div>`).join('');
         }
 
@@ -623,6 +695,8 @@
             selLevel = profile.level || '';
             selHobbies = new Set(profile.hobbies || []);
             $('pf-error').innerText = '';
+            $('pf-ai').value = localStorage.getItem('sh_aikey') || '';
+            $('nav').classList.toggle('hidden', !!first); if (!first) setNav('profile');
             paintChips();
         }
 
@@ -663,10 +737,146 @@
                 name: $('pf-name').value.trim() || curUser.displayName || 'User',
                 bio: $('pf-bio').value.trim(), country: $('pf-country').value.trim(), gender: $('pf-gender').value,
                 level: selLevel, hobbies: [...selHobbies], pic: pendingPic || profile.pic || '' };
-            try { localStorage.setItem('sh_' + curUser.uid, JSON.stringify(profile)); } catch (e) {}
+            try { localStorage.setItem('sh_' + curUser.uid, JSON.stringify(profile)); localStorage.setItem('sh_aikey', $('pf-ai').value.trim()); } catch (e) {}
             setDoc(doc(db, 'users', curUser.uid), { ...profile, email: curUser.email }, { merge: true }).catch(e => console.error('Profile save:', e));
             renderDashboard();
         }
+
+        const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+        const ZONES = { essay: ['📝', 'Essay zone', 'Share essays and study notes', false], speaking: ['🎤', 'Speaking zone', 'Share speaking notes, prompts and tips', false], books: ['📚', 'Textbooks', 'Share a textbook or notes link', false], diary: ['📖', 'Study diary', 'What did you read or study today? (private)', true], feedback: ['💬', 'Feedback', 'Tell us what to improve (private)', true] };
+        let zoneKey = '', chatId = '', unsubQ = null, unsubC = null;
+        document.documentElement.dataset.theme = localStorage.getItem('sh_theme') || 'light';
+
+        window.toggleTheme = () => { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; localStorage.setItem('sh_theme', t); };
+        function setNav(t) { document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.t === t)); }
+        function go(id) { currentSlideNum = 'app'; document.querySelectorAll('.slide').forEach(el => el.classList.add('hidden')); $(id).classList.remove('hidden'); $('nav').classList.remove('hidden'); }
+        window.tab = t => {
+            if (t === 'home') renderDashboard();
+            else if (t === 'profile') openProfile(false);
+            else { go(t + '-screen'); if (t === 'rank') loadRank(); if (t === 'match') loadClubs(); if (t === 'zones') showZones(); }
+            setNav(t);
+        };
+
+        async function persist() {
+            try { localStorage.setItem('sh_' + curUser.uid, JSON.stringify(profile)); } catch (e) {}
+            setDoc(doc(db, 'users', curUser.uid), { ...profile, email: curUser.email }, { merge: true }).catch(e => console.error(e));
+        }
+
+        window.checkIn = async function() {
+            const today = new Date().toDateString();
+            if (profile.last !== today) {
+                const y = new Date(Date.now() - 864e5).toDateString();
+                profile.streak = profile.last === y ? (profile.streak || 0) + 1 : 1;
+                profile.last = today;
+                persist();
+                setDoc(doc(db, 'leaderboard', curUser.uid), { name: profile.name || 'User', level: profile.level || '', streak: profile.streak }, { merge: true }).catch(e => console.error(e));
+            }
+            if ($('streak')) $('streak').innerText = `🔥 ${profile.streak} day streak`;
+        };
+
+        async function loadRank() {
+            try {
+                const s = await getDocs(query(collection(db, 'leaderboard'), orderBy('streak', 'desc'), limit(20)));
+                $('rank-list').innerHTML = s.docs.map((d, i) => { const r = d.data(); return `<div class="rec" style="display:flex; justify-content:space-between;"><span>${i + 1}. ${esc(r.name)} <small style="color:var(--text-muted)">${esc(r.level)}</small></span><b>🔥 ${r.streak || 0}</b></div>`; }).join('') || '<p class="sub">No one yet. Check in to be first!</p>';
+            } catch (e) { $('rank-list').innerText = 'Could not load: ' + (e.code || e.message); }
+        }
+
+        // ----- Zones (essay, speaking, textbooks, diary, feedback) -----
+        window.showZones = function() {
+            $('zone-view').style.display = 'none'; $('zone-grid').style.display = 'block';
+            $('zone-grid').innerHTML = Object.entries(ZONES).map(([k, z]) => `<button class="box" style="display:block; width:100%; cursor:pointer; color:inherit;" onclick="openZone('${k}')"><b>${z[0]} ${z[1]}</b><br><span style="font-size:12px; color:var(--text-muted)">${z[2]}</span></button>`).join('');
+        };
+        window.openZone = function(k) {
+            zoneKey = k; const z = ZONES[k];
+            $('zone-grid').style.display = 'none'; $('zone-view').style.display = 'block';
+            $('z-title').innerText = z[0] + ' ' + z[1]; $('z-desc').innerText = z[2];
+            $('z-u-wrap').style.display = k === 'books' ? 'block' : 'none';
+            loadZone();
+        };
+        async function loadZone() {
+            const z = ZONES[zoneKey], col = collection(db, z[3] ? 'private_posts' : 'public_posts');
+            try {
+                const snap = await getDocs(z[3] ? query(col, where('uid', '==', curUser.uid), limit(60)) : query(col, where('type', '==', zoneKey), limit(60)));
+                const rows = snap.docs.map(d => d.data()).filter(p => p.type === zoneKey).sort((a, b) => b.ts - a.ts);
+                $('z-list').innerHTML = rows.map(p => `<div class="box"><b>${esc(p.title)}</b><p style="font-size:13px; margin:6px 0; padding:0; white-space:pre-wrap; text-align:left;">${esc(p.body)}</p>${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" style="font-size:13px;">Open link</a>` : ''}<p style="font-size:11px; color:var(--text-muted); margin:6px 0 0; padding:0; text-align:left;">${esc(p.name)} · ${new Date(p.ts).toLocaleDateString()}</p></div>`).join('') || '<p class="sub">Nothing here yet.</p>';
+            } catch (e) { $('z-list').innerText = 'Could not load: ' + (e.code || e.message); }
+        }
+        window.addPost = async function() {
+            const z = ZONES[zoneKey], t = $('z-t').value.trim(), b = $('z-b').value.trim(), u = $('z-u').value.trim();
+            if (!t && !b) return;
+            try {
+                await addDoc(collection(db, z[3] ? 'private_posts' : 'public_posts'), { type: zoneKey, uid: curUser.uid, name: profile.name || 'User', title: t, body: b, url: /^https?:\/\//.test(u) ? u : '', ts: Date.now() });
+                $('z-t').value = $('z-b').value = $('z-u').value = '';
+                if (zoneKey === 'diary') checkIn();
+                loadZone();
+            } catch (e) { alert('Could not post: ' + (e.code || e.message)); }
+        };
+
+        // ----- Live matching + chat -----
+        window.findMatch = async function() {
+            const uid = curUser.uid, st = $('match-status'), me = doc(db, 'queue', uid);
+            try {
+                await setDoc(me, { uid, name: profile.name || 'User', level: profile.level, hobbies: profile.hobbies || [], ts: Date.now(), chatId: '' });
+                st.innerText = 'Looking for a partner...';
+                if (unsubQ) unsubQ();
+                unsubQ = onSnapshot(me, s => { const d = s.data(); if (d && d.chatId) { unsubQ(); unsubQ = null; openChat(d.chatId, 'Study partner'); } });
+                const snap = await getDocs(query(collection(db, 'queue'), limit(30)));
+                let best = null, bs = -99;
+                snap.forEach(s => {
+                    const o = s.data();
+                    if (o.uid === uid || o.chatId || Date.now() - o.ts > 600000) return;
+                    const sc = (o.hobbies || []).filter(h => (profile.hobbies || []).includes(h)).length * 2 - Math.abs(LEVELS.indexOf(o.level) - LEVELS.indexOf(profile.level));
+                    if (sc > bs) { bs = sc; best = o; }
+                });
+                if (best) {
+                    const id = [uid, best.uid].sort().join('_');
+                    await setDoc(doc(db, 'chats', id), { members: [uid, best.uid], ts: Date.now() });
+                    await updateDoc(doc(db, 'queue', best.uid), { chatId: id });
+                    await updateDoc(me, { chatId: id });
+                } else st.innerText = 'Waiting for someone to join... keep this page open (10 min).';
+            } catch (e) { st.innerText = 'Error: ' + (e.code || e.message); }
+        };
+        window.openChat = function(id, title) {
+            chatId = id; go('chat-screen'); setNav('match');
+            $('chat-title').innerText = title;
+            $('call-link').href = 'https://meet.jit.si/StudyHub' + id.replace(/[^A-Za-z0-9]/g, '');
+            if (unsubC) unsubC();
+            unsubC = onSnapshot(query(collection(db, 'chats', id, 'messages'), orderBy('ts'), limit(100)), s => {
+                $('msgs').innerHTML = s.docs.map(d => { const m = d.data(); return `<div class="msg ${m.uid === curUser.uid ? 'me' : ''}"><b>${esc(m.name)}</b><br>${esc(m.text)}</div>`; }).join('');
+                $('msgs').scrollTop = 1e9;
+            }, e => { $('msgs').innerText = 'Chat error: ' + (e.code || e.message); });
+        };
+        window.sendMsg = async function() {
+            const t = $('msg-in').value.trim(); if (!t) return; $('msg-in').value = '';
+            try { await addDoc(collection(db, 'chats', chatId, 'messages'), { uid: curUser.uid, name: profile.name || 'User', text: t, ts: Date.now() }); } catch (e) { alert('Send failed: ' + (e.code || e.message)); }
+        };
+        $('msg-in').addEventListener('keydown', e => { if (e.key === 'Enter') window.sendMsg(); });
+
+        // ----- Book clubs -----
+        async function loadClubs() {
+            try {
+                const s = await getDocs(query(collection(db, 'clubs'), limit(30)));
+                $('club-list').innerHTML = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => b.ts - a.ts).map(c => `<div class="rec" style="display:flex; justify-content:space-between; align-items:center; gap:8px;"><span>${esc(c.title)}<br><small style="color:var(--text-muted)">${esc(c.level)} · by ${esc(c.by)}</small></span><button class="btn-small" onclick="openChat('club_${c.id}', '${esc(c.title).replace(/'/g, '')}')">Join</button></div>`).join('') || '<p class="sub">No clubs yet. Start one!</p>';
+            } catch (e) { $('club-list').innerText = 'Could not load: ' + (e.code || e.message); }
+        }
+        window.createClub = async function() {
+            const t = $('club-title').value.trim(); if (!t) return;
+            try { await addDoc(collection(db, 'clubs'), { title: t, level: profile.level, by: profile.name || 'User', uid: curUser.uid, ts: Date.now() }); $('club-title').value = ''; loadClubs(); } catch (e) { alert('Could not create: ' + (e.code || e.message)); }
+        };
+
+        // ----- AI plan (uses your own key, stored only on this device) -----
+        window.askAI = async function() {
+            const key = localStorage.getItem('sh_aikey'), out = $('ai-out');
+            if (!key) { out.innerText = 'Add an AI key in Profile first.'; return; }
+            out.innerText = 'Thinking...';
+            try {
+                const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST',
+                    headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+                    body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 400, messages: [{ role: 'user', content: `English level ${profile.level}; hobbies: ${(profile.hobbies || []).join(', ')}. Give 3 short, specific study tasks for today (reading, writing, speaking) linked to those hobbies. Under 90 words.` }] }) });
+                const j = await r.json();
+                out.innerText = (j.content && j.content[0] && j.content[0].text) || (j.error && j.error.message) || 'No reply';
+            } catch (e) { out.innerText = 'AI request failed: ' + e.message; }
+        };
 
         const QUIZ = {
             A: ['She go to school every day.', 'She goes to school every day.'],
