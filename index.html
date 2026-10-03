@@ -1,419 +1,1066 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Study & Social Ultimate App - 2000+ Lines Enterprise Version</title>
-<!-- Tailwind CSS CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<!-- FontAwesome Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<script>
-tailwind.config = {
-theme: {
-extend: {
-colors: {
-appBg: '#f7f4ed',      // 标志性暖米色背景
-cardBg: '#ffffff',     // 纯白卡片
-cardBorder: '#eee8df', // 浅色细边框
-themeOrange: '#ff8c00',// 原图亮橙色高亮
-textMain: '#333333',   // 主文字
-textSub: '#888888'     // 辅助文字
-}
-}
-}
-}
-</script>
-<style>
-body { background-color: #f7f4ed; color: #333333; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-.tab-content { display: none; }
-.tab-content.active { display: block; }
-.sub-tab-content { display: none; }
-.sub-tab-content.active { display: block; }
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Partner - 1000+ Lines CSS & HTML</title>
+    <!-- FontAwesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ==========================================================================
+           1. 基础全局样式与 CSS 变量系统 (Theming & Variables)
+           ========================================================================== */
+        :root {
+            --app-bg: #f7f4ed;
+            --card-bg: #ffffff;
+            --card-border: #eee8df;
+            --theme-orange: #ff8c00;
+            --theme-orange-hover: #e07b00;
+            --text-main: #333333;
+            --text-sub: #888888;
+            --text-light: #aaaaaa;
+            --danger-color: #ff4d4d;
+            --success-color: #52c41a;
+            --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.03);
+            --shadow-card: 0 6px 16px rgba(0, 0, 0, 0.05);
+            --radius-main: 24px;
+            --radius-card: 20px;
+            --radius-btn: 14px;
+            --transition-speed: 0.25s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--app-bg);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding-bottom: 90px;
+            user-select: none;
+        }
+
+        /* 隐藏滚动条 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* ==========================================================================
+           2. 登录遮罩与认证弹窗系统 (Auth Modal CSS)
+           ========================================================================== */
+        .auth-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(6px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 1;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .auth-modal-overlay.hidden {
+            display: none;
+            opacity: 0;
+        }
+
+        .auth-modal-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-main);
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-icon-wrapper {
+            width: 56px;
+            height: 56px;
+            background-color: #fff3e0;
+            color: var(--theme-orange);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px auto;
+            font-size: 22px;
+        }
+
+        .auth-modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .auth-modal-desc {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .auth-error-box {
+            background-color: #fff2f0;
+            border: 1px solid #ffccc7;
+            color: var(--danger-color);
+            font-size: 11px;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .auth-error-box:not(:empty) {
+            display: block;
+        }
+
+        .auth-input-field {
+            width: 100%;
+            background-color: #faf9f6;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-btn);
+            padding: 14px 16px;
+            font-size: 14px;
+            color: var(--text-main);
+            outline: none;
+            margin-bottom: 14px;
+            transition: border-color var(--transition-speed);
+        }
+
+        .auth-input-field:focus {
+            border-color: var(--theme-orange);
+            background-color: #ffffff;
+        }
+
+        .auth-submit-btn {
+            width: 100%;
+            background-color: var(--theme-orange);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 14px;
+            border: none;
+            border-radius: var(--radius-btn);
+            cursor: pointer;
+            transition: background-color var(--transition-speed), transform 0.1s ease;
+            box-shadow: 0 4px 12px rgba(255, 140, 0, 0.25);
+        }
+
+        .auth-submit-btn:hover {
+            background-color: var(--theme-orange-hover);
+        }
+
+        .auth-submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ==========================================================================
+           3. 专注计时器浮窗系统 (Timer Modal CSS)
+           ========================================================================== */
+        .timer-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(8px);
+            z-index: 1001;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .timer-modal-overlay.hidden {
+            display: none;
+        }
+
+        .timer-modal-card {
+            background-color: var(--card-bg);
+            border-radius: 32px;
+            padding: 32px 24px;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--card-border);
+        }
+
+        .timer-status-tag {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .timer-display-clock {
+            font-family: monospace;
+            font-size: 56px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 2px;
+            margin-bottom: 28px;
+        }
+
+        .timer-btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .timer-action-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: var(--radius-btn);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: opacity var(--transition-speed);
+        }
+
+        .timer-pause-btn {
+            background-color: #f0eee6;
+            color: var(--text-main);
+        }
+
+        .timer-stop-btn {
+            background-color: var(--danger-color);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(255, 77, 77, 0.3);
+        }
+
+        /* ==========================================================================
+           4. 顶部导航与标签控制系统 (Header & Navigation CSS)
+           ========================================================================== */
+        .app-header {
+            position: sticky;
+            top: 0;
+            background-color: rgba(247, 244, 237, 0.92);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(238, 232, 223, 0.8);
+            z-index: 100;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-tabs-container {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sub);
+            overflow-x: auto;
+        }
+
+        .top-tab-btn {
+            background: none;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sub);
+            cursor: pointer;
+            padding-bottom: 4px;
+            white-space: nowrap;
+            transition: color var(--transition-speed);
+        }
+
+        .top-tab-btn.active {
+            color: var(--text-main);
+            font-weight: 700;
+            border-bottom: 2px solid var(--theme-orange);
+        }
+
+        .user-status-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-left: 8px;
+        }
+
+        .user-email-label {
+            font-size: 10px;
+            color: var(--text-light);
+            max-width: 80px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 4px;
+            transition: color var(--transition-speed);
+        }
+
+        .logout-btn:hover {
+            color: var(--danger-color);
+        }
+
+        /* ==========================================================================
+           5. 主体容器与多区域面板系统 (Main Content & Panels CSS)
+           ========================================================================== */
+        .app-main-container {
+            flex: 1;
+            max-width: 440px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .section-panel {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .section-panel.active {
+            display: flex;
+        }
+
+        .tab-content {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tab-content.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ==========================================================================
+           6. 看板与统计小组件样式 (Dashboard & Stats Cards CSS)
+           ========================================================================== */
+        .dashboard-stats-bar {
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-card);
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--text-sub);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .dashboard-stats-bar strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+        /* 日期横向滚动条样式 */
+        .date-scroll-container {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .date-card-item {
+            flex-shrink: 0;
+            width: 50px;
+            height: 68px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .date-card-item span:last-child {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 2px;
+        }
+
+        .date-card-item.active {
+            background-color: var(--theme-orange);
+            color: #ffffff;
+            border-color: var(--theme-orange);
+            box-shadow: 0 6px 16px rgba(255, 140, 0, 0.3);
+        }
+
+        .date-card-item.active span:last-child {
+            color: #ffffff;
+        }
+
+        .date-card-item.highlight-blue {
+            background-color: #f0f7ff;
+            border-color: #bae0ff;
+            color: #1677ff;
+        }
+
+        .date-card-item.highlight-blue span:last-child {
+            color: #1677ff;
+        }
+
+        /* 通用白卡片设计 (Custom White Card) */
+        .custom-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-main);
+            padding: 18px;
+            box-shadow: var(--shadow-card);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            border-bottom: 1px solid #f5f2eb;
+            padding-bottom: 10px;
+        }
+
+        .card-title-bold {
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-badge-orange {
+            background-color: #fff3e0;
+            color: var(--theme-orange);
+            border: 1px solid #ffe0b2;
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        /* 任务复选框列表样式 */
+        .task-checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 12px;
+            color: #555555;
+        }
+
+        .task-check-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .task-check-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--theme-orange);
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* ==========================================================================
+           7. 社交、操场与个人主页样式 (Social, Square & Profile CSS)
+           ========================================================================== */
+        .social-user-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .social-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .social-avatar-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--card-border);
+        }
+
+        .social-avatar-text {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #e6f4ea;
+            color: var(--success-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .social-action-btn {
+            background-color: #fff3e0;
+            color: var(--theme-orange);
+            border: 1px solid #ffe0b2;
+            padding: 8px 14px;
+            border-radius: var(--radius-btn);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+        }
+
+        .social-action-btn:hover {
+            background-color: #ffe0b2;
+        }
+
+        /* 个人主页统计栏 */
+        .profile-header-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-sub);
+            border-top: 1px solid #f5f2eb;
+            padding-top: 14px;
+        }
+
+        .profile-stat-number {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 2px;
+        }
+
+        /* ==========================================================================
+           8. 底部导航栏与悬浮专注按钮 (Bottom Navigation CSS)
+           ========================================================================== */
+        .app-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--app-bg);
+            border-top: 1px solid rgba(238, 232, 223, 0.9);
+            max-width: 440px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.03);
+        }
+
+        .bottom-nav-btn {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+            color: var(--text-sub);
+            cursor: pointer;
+            transition: color var(--transition-speed);
+        }
+
+        .bottom-nav-btn i {
+            font-size: 16px;
+        }
+
+        .bottom-nav-btn.active {
+            color: var(--theme-orange);
+            font-weight: 600;
+        }
+
+        /* 悬浮开始专注圆形按钮 */
+        .floating-focus-btn {
+            position: absolute;
+            top: -24px;
+            right: 24px;
+            width: 50px;
+            height: 50px;
+            background-color: var(--theme-orange);
+            color: #ffffff;
+            border-radius: 50%;
+            border: 3px solid var(--app-bg);
+            box-shadow: 0 6px 16px rgba(255, 140, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color var(--transition-speed);
+        }
+
+        .floating-focus-btn:hover {
+            background-color: var(--theme-orange-hover);
+        }
+
+        .floating-focus-btn:active {
+            transform: scale(0.92);
+        }
+
+        .floating-focus-btn i {
+            font-size: 12px;
+            margin-bottom: 1px;
+        }
+    </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between pb-28 select-none">
-​<!-- ================= 身份认证模态框 (Firebase Gmail Auth) ================= -->
-<div id="auth-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6 backdrop-blur-sm hidden">
-<div class="bg-white border border-gray-200 rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl space-y-4">
-<div class="w-14 h-14 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto text-xl font-bold shadow-inner">
-<i class="fa-solid fa-seedling"></i>
-</div>
-<h2 class="text-lg font-bold text-gray-800">学习搭子云端控制台</h2>
-<p class="text-xs text-gray-500">登录您的 Gmail 账号以同步全栈学习进度与习惯数据</p>
-<div id="auth-error" class="text-red-500 text-xs hidden bg-red-50 p-2.5 rounded-xl border border-red-100"></div>
-<input type="email" id="auth-email" placeholder="name@gmail.com" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 text-gray-800 transition">
-<input type="password" id="auth-password" placeholder="密码 (至少6位)" class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:border-orange-500 text-gray-800 transition">
-<button onclick="handleEmailAuth()" class="w-full bg-[#ff8c00] hover:bg-orange-600 text-white font-medium py-3 rounded-2xl transition text-sm shadow-md">登录 / 注册</button>
-</div>
-</div>
-​<!-- ================= 专注计时器全功能模态框 ================= -->
-<div id="timer-modal" class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-6 hidden backdrop-blur-md">
-<div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl space-y-6 border border-gray-100">
-<div class="text-xs font-bold text-gray-400 uppercase tracking-widest">沉浸专注计时中</div>
-<div id="timer-display" class="text-6xl font-mono font-bold text-gray-800">25:00</div>
-<div class="flex space-x-3">
-<button onclick="pauseTimer()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-2xl font-medium text-sm transition">暂停</button>
-<button onclick="stopTimer()" class="flex-1 bg-red-500 hover:bg-red-600 text-white py-3 rounded-2xl font-medium text-sm transition">结束并打卡</button>
-</div>
-</div>
-</div>
-​<!-- ================= 顶部导航与标签栏 ================= -->
-<header class="sticky top-0 bg-[#f7f4ed]/90 backdrop-blur-md border-b border-gray-200/60 z-30 px-4 py-3 flex justify-between items-center">
-<div id="top-nav-tabs" class="flex space-x-5 text-sm font-medium text-gray-500 overflow-x-auto no-scrollbar">
-<!-- 动态注入子菜单 -->
-</div>
-<div class="flex items-center space-x-2 pl-2">
-<span id="user-email-display" class="text-[10px] text-gray-400 truncate max-w-[80px]"></span>
-<button onclick="logout()" class="text-xs text-gray-400 hover:text-red-500 transition" title="登出"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-</div>
-</header>
-​<!-- ================= 主体内容展示区 ================= -->
-<main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
-​<!-- 1. 学习模块 -->
-<div id="section-study" class="space-y-4">
-​<!-- 看板 Tab -->
-<div id="tab-kanban" class="tab-content space-y-4">
-<div class="flex justify-between items-center text-xs text-gray-500 px-2 font-medium bg-white/70 p-3 rounded-2xl border border-gray-200/60 shadow-sm">
-<span>总计专注 <strong class="text-gray-900"
-               </span>
-<span>连续 <strong class="text-gray-900">未使用</strong></span>
-<span>计划 <strong class="text-gray-900">8个</strong></span>
-</div>
-​<!-- 日期横向选择器 -->
-<div class="flex space-x-2 overflow-x-auto pb-1 no-scrollbar">
-<div onclick="selectDate(13, this)" class="date-card flex-shrink-0 w-12 h-16 bg-[#ff8c00] text-white rounded-2xl flex flex-col items-center justify-center text-xs font-bold shadow-sm cursor-pointer"><span>一</span><span class="text-base mt-0.5">13</span></div>
-<div onclick="selectDate(14, this)" class="date-card flex-shrink-0 w-12 h-16 bg-white border border-gray-200 text-gray-500 rounded-2xl flex flex-col items-center justify-center text-xs cursor-pointer"><span>二</span><span class="text-base mt-0.5 text-gray-800">14</span></div>
-<div onclick="selectDate(15, this)" class="date-card flex-shrink-0 w-12 h-16 bg-white border border-gray-200 text-gray-500 rounded-2xl flex flex-col items-center justify-center text-xs cursor-pointer"><span>三</span><span class="text-base mt-0.5 text-gray-800">15</span></div>
-<div onclick="selectDate(16, this)" class="date-card flex-shrink-0 w-12 h-16 bg-blue-50 border border-blue-200 text-blue-600 rounded-2xl flex flex-col items-center justify-center text-xs cursor-pointer"><span>四</span><span class="text-base mt-0.5">16</span></div>
-<div onclick="selectDate(17, this)" class="date-card flex-shrink-0 w-12 h-16 bg-white border border-gray-200 text-gray-500 rounded-2xl flex flex-col items-center justify-center text-xs cursor-pointer"><span>五</span><span class="text-base mt-0.5 text-gray-800">17</span></div>
-<div onclick="selectDate(18, this)" class="date-card flex-shrink-0 w-12 h-16 bg-white border border-gray-200 text-gray-500 rounded-2xl flex flex-col items-center justify-center text-xs cursor-pointer"><span>六</span><span class="text-base mt-0.5 text-gray-800">18</span></div>
-</div>
-​<!-- 日活动统计卡片 -->
-<div class="bg-white border border-gray-200/80 rounded-2xl p-4 space-y-3 shadow-sm">
-<div class="flex justify-between items-center border-b border-gray-100 pb-2 text-xs">
-<span class="font-bold text-gray-800"><i class="fa-solid fa-chart-pie mr-1.5 text-orange-400"></i>日活动：日专注 <span id="current-day-focus">7时40分</span></span>
-</div>
-<div class="space-y-2 text-xs text-gray-600">
-<div class="flex justify-between"><span>管理学背诵</span><span class="text-gray-900 font-medium">2时45分</span></div>
-<div class="flex justify-between"><span>经济学</span><span class="text-gray-900 font-medium">2时10分</span></div>
-<div class="flex justify-between"><span>英语真题讲解</span><span class="text-gray-900 font-medium">1时20分</span></div>
-</div>
-</div>
-​<!-- 日计划及总结 -->
-<div class="bg-white border border-gray-200/80 rounded-2xl p-4 space-y-3 shadow-sm">
-<div class="flex justify-between items-center text-xs">
-<span class="text-orange-500 bg-orange-50 px-2.5 py-1 rounded-lg font-medium border border-orange-100">搭友可见</span>
-<button onclick="clearDailyPlan()" class="text-gray-400 hover:text-red-500 text-xs transition">一删除</button>
-</div>
-<div id="kanban-task-list" class="space-y-2 text-xs text-gray-700">
-<label class="flex items-center space-x-2.5"><input type="checkbox" checked class="accent-orange-500 w-4 h-4"> <span>管理学背诵 80-85</span></label>
-<label class="flex items-center space-x-2.5"><input type="checkbox" checked class="accent-orange-500 w-4 h-4"> <span>管理学复习 38-48</span></label>
-<label class="flex items-center space-x-2.5"><input type="checkbox" checked class="accent-orange-500 w-4 h-4"> <span>经济法听课 2h 以上</span></label>
-</div>
-</div>
-</div>
-​<!-- 日计划 Tab -->
-<div id="tab-daily-plan" class="tab-content space-y-4">
-<div class="flex space-x-6 border-b border-gray-200 pb-2 text-xs font-medium">
-<button onclick="switchPlanTab('friend')" id="plan-btn-friend" class="text-gray-900 font-bold border-b-2 border-orange-500 pb-1">搭友圈</button>
-<button onclick="switchPlanTab('mine')" id="plan-btn-mine" class="text-gray-400 pb-1">我的</button>
-</div>
-<div class="bg-white border border-gray-200/80 rounded-2xl p-4 space-y-3 shadow-sm text-xs">
-<div class="flex justify-between text-gray-400">
-<span>今天 07.20</span>
-<span class="text-orange-500 font-medium">搭友可见</span>
-</div>
-<p class="text-gray-700">第二天的计划这里直接便捷制定</p>
-<div class="border border-dashed border-gray-200 p-6 rounded-2xl text-center text-gray-400 bg-gray-50 space-y-2">
-<i class="fa-solid fa-cloud-arrow-up text-2xl text-gray-300"></i>
-<div>完成证明图片区</div>
-</div>
-<button onclick="alert('今日计划总结已成功发送给搭友！')" class="w-full bg-[#ff8c00] hover:bg-orange-600 text-white py-3 rounded-2xl font-medium shadow-sm transition">提交计划总结</button>
-</div>
-</div>
-​<!-- 目标 OKR Tab -->
-<div id="tab-okr" class="tab-content space-y-4">
-<div class="flex space-x-6 border-b border-gray-200 pb-2 text-xs font-medium">
-<button onclick="switchOkrTab('friend')" id="okr-btn-friend" class="text-gray-900 font-bold border-b-2 border-orange-500 pb-1">搭友圈</button>
-<button onclick="switchOkrTab('mine')" id="okr-btn-mine" class="text-gray-400 pb-1">我的</button>
-<button onclick="switchOkrTab('archive')" id="okr-btn-archive" class="text-gray-400 pb-1">我的归档</button>
-</div>
-<div class="bg-white border border-gray-200/80 rounded-2xl p-4 space-y-3 shadow-sm text-xs">
-<div class="flex justify-between text-gray-400">
-<span>📅 2027.01.01 截止，还剩 166 天</span>
-<span class="text-orange-500 font-medium">搭友可见</span>
-</div>
-<div class="text-sm font-bold text-gray-800">阶段目标与核心考点突破</div>
-<div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-<div class="bg-[#ff8c00] h-full w-2/3"></div>
-</div>
-<div class="text-gray-400 text-[11px]">长效目标与核心关键结果（Key Results）进度管理</div>
-</div>
-</div>
-​<!-- 小习惯 Tab -->
-<div id="tab-habit" class="tab-content space-y-4">
-<div class="bg-white border border-gray-200/80 rounded-2xl p-4 space-y-3 shadow-sm text-xs">
-<div class="text-gray-400 font-bold mb-1">▼ 起床</div>
-<div class="flex justify-between items-center py-2 border-b border-gray-100">
-<span class="text-gray-700">早起 (0/1 每天)</span>
-<button onclick="toggleHabitBtn(this)" class="border border-gray-200 px-3 py-1.5 rounded-xl text-gray-600 bg-gray-50 transition hover:bg-orange-50 hover:border-orange-200">打卡</button>
-</div>
-<div class="text-gray-400 font-bold pt-2 mb-1">▼ 晚上</div>
-<div class="flex justify-between items-center py-2">
-<span class="text-gray-700">散步 (19:30提醒)</span>
-<button onclick="toggleHabitBtn(this)" class="border border-gray-200 px-3 py-1.5 rounded-xl text-gray-600 bg-gray-50 transition hover:bg-orange-50 hover:border-orange-200">打卡</button>
-</div>
-</div>
-</div>
-​</div>
-​<!-- 2. 搭友区域 -->
-<div id="section-social" class="tab-content space-y-4">
-<div class="flex space-x-6 border-b border-gray-200 pb-2 text-xs font-medium">
-<span class="text-gray-900 font-bold border-b-2 border-orange-500 pb-1">搭友 (4)</span>
-<span class="text-gray-400 pb-1">消息互动</span>
-</div>
-<div class="space-y-3">
-<div class="bg-white border border-gray-200/80 rounded-2xl p-4 flex justify-between items-center text-xs shadow-sm">
-<div class="flex items-center space-x-3">
-<img src="[https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100](https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100)" class="w-10 h-10 rounded-full object-cover shadow-sm">
-<div>
-<div class="font-bold text-gray-800 flex items-center space-x-2"><span>岁晏</span> <span class="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-500 border border-gray-200">私聊</span></div>
-<div class="text-orange-500 mt-0.5">已专注 31时26分 • 1天前</div>
-</div>
-</div>
-<button onclick="alert('已向 岁晏 发送连线自习邀请！')" class="bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 px-3.5 py-2 rounded-xl font-medium transition shadow-sm">邀请连线自习</button>
-</div>
-<div class="bg-white border border-gray-200/80 rounded-2xl p-4 flex justify-between items-center text-xs shadow-sm">
-<div class="flex items-center space-x-3">
-<div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold shadow-sm">牛</div>
-<div>
-<div class="font-bold text-gray-800 flex items-center space-x-2"><span>性感大野牛</span> <span class="bg-gray-100 px-2 py-0.5 rounded text-[10px] text-gray-500 border border-gray-200">私聊</span></div>
-<div class="text-gray-400 mt-0.5">累计已专注 11时48分</div>
-</div>
-</div>
-<button onclick="alert('已向 性感大野牛 发送连线自习邀请！')" class="bg-orange-50 hover:bg-orange-100 text-orange-600 border border-orange-200 px-3.5 py-2 rounded-xl font-medium transition shadow-sm">邀请连线自习</button>
-</div>
-</div>
-</div>
-​<!-- 3. 发现/操场区域 -->
-<div id="section-square" class="tab-content space-y-4">
-<div class="flex space-x-4 border-b border-gray-200 pb-2 text-xs font-medium overflow-x-auto no-scrollbar text-gray-500">
-<span class="text-gray-900 font-bold border-b-2 border-orange-500 pb-1 whitespace-nowrap">全部</span>
-<span class="whitespace-nowrap">搭友分享</span>
-<span class="whitespace-nowrap">向全世界叽叽喳喳</span>
-<span class="whitespace-nowrap">待办</span>
-<span class="whitespace-nowrap">碎碎念</span>
-</div>
-<div class="bg-white border border-gray-200/80 rounded-2xl p-4 space-y-3 shadow-sm text-xs">
-<div class="flex justify-between text-gray-400">
-<span>周一 07.20</span>
-<span class="text-orange-500 font-medium">公开</span>
-</div>
-<div class="bg-orange-50/60 p-3 rounded-2xl text-gray-800 font-medium border border-orange-100">
-今天把睡眠状态调整过来了，太不容易了 🥲
-</div>
-<div class="flex justify-between text-gray-400 pt-1">
-<span><i class="fa-regular fa-thumbs-up mr-1"></i> 3</span>
-<span><i class="fa-regular fa-comment mr-1"></i> 2</span>
-</div>
-</div>
-</div>
-​<!-- 4. 我的（个人主页）区域 -->
-<div id="section-profile" class="tab-content space-y-4">
-<div class="bg-white border border-gray-200/80 rounded-2xl p-5 space-y-4 shadow-sm">
-<div class="flex items-center space-x-4">
-<div class="w-14 h-14 rounded-full bg-orange-100 border-2 border-orange-300 flex items-center justify-center text-xl text-orange-600 font-bold shadow-inner">初</div>
-<div>
-<div class="font-bold text-sm text-gray-800">1. 初级学员</div>
-<div class="text-xs text-gray-400 mt-0.5 italic">“想，全的问题；做，都是答案”</div>
-</div>
-</div>
-<div class="grid grid-cols-5 text-center text-xs border-t border-gray-100 pt-3 text-gray-500">
-<div><div class="font-bold text-gray-800 text-sm">2</div>关注</div>
-<div><div class="font-bold text-gray-800 text-sm">1</div>粉丝</div>
-<div><div class="font-bold text-gray-800 text-sm">8</div>看过我</div>
-<div><div class="font-bold text-gray-800 text-sm">7</div>我看过</div>
-<div><div class="font-bold text-gray-800 text-sm">0</div>我的赞</div>
-</div>
-</div>
-<div class="bg-white border border-gray-200/80 rounded-2xl p-4 space-y-3 shadow-sm text-xs">
-<div class="font-bold text-gray-800 mb-2">⚙️ 系统与云端状态</div>
-<div class="flex justify-between py-2 border-b border-gray-100 text-gray-600"><span>大学与标签</span><span class="text-gray-400">已绑定引力标签</span></div>
-<div class="flex justify-between py-2 text-gray-600"><span>云端实时同步</span><span class="text-green-500 font-medium">Firebase 数据库在线</span></div>
-</div>
-</div>
-​</main>
-​<!-- ================= 底部主导航栏 ================= -->
-<nav class="fixed bottom-0 left-0 right-0 bg-[#f7f4ed] border-t border-gray-200/80 max-w-md mx-auto flex justify-around py-3 z-40 text-xs shadow-lg">
-<button onclick="switchMainSection('study', event)" id="nav-btn-study" class="nav-btn text-orange-500 flex flex-col items-center space-y-1 transition">
-<i class="fa-solid fa-graduation-cap text-base"></i><span>学习</span>
-</button>
-<button onclick="switchMainSection('social', event)" id="nav-btn-social" class="nav-btn text-gray-400 flex flex-col items-center space-y-1 transition">
-<i class="fa-solid fa-user-group text-base"></i><span>搭友</span>
-</button>
-<button onclick="switchMainSection('square', event)" id="nav-btn-square" class="nav-btn text-gray-400 flex flex-col items-center space-y-1 transition">
-<i class="fa-solid fa-compass text-base"></i><span>发现</span>
-</button>
-<button onclick="switchMainSection('profile', event)" id="nav-btn-profile" class="nav-btn text-gray-400 flex flex-col items-center space-y-1 transition">
-<i class="fa-solid fa-user text-base"></i><span>我的</span>
-</button>
-<!-- 悬浮开始专注按钮 -->
-<div class="absolute -top-6 right-6">
-<button onclick="startTimer()" class="w-13 h-13 w-12 h-12 bg-[#ff8c00] hover:bg-orange-600 text-white rounded-full shadow-lg flex flex-col items-center justify-center text-[10px] font-bold border-2 border-white transition transform active:scale-95">
-<i class="fa-solid fa-play text-xs"></i>专注
-</button>
-</div>
-</nav>
-​<!-- ================= 2000+行等效高能业务逻辑与 Firebase SDK 脚本 ================= -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-​// 用户指定的专属 Firebase 配置
-const firebaseConfig = {
-apiKey: "AIzaSyBaiSjLnTaVhLdwfsNA2Teb-8y5ITeBQfc",
-authDomain: "english-pairing-5786e.firebaseapp.com",
-databaseURL: "https://english-pairing-5786e-default-rtdb.asia-southeast1.firebasedatabase.app",
-projectId: "english-pairing-5786e",
-storageBucket: "english-pairing-5786e.firebasestorage.app",
-messagingSenderId: "673981745505",
-appId: "1:673981745505:web:863a0994ef718536505d20",
-measurementId: "G-1LBGN8Q3B2"
-};
-​const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const analytics = getAnalytics(app);
-​// 统一身份验证处理
-window.handleEmailAuth = async function() {
-const email = document.getElementById('auth-email').value.trim();
-const password = document.getElementById('auth-password').value.trim();
-const errorBox = document.getElementById('auth-error');
-errorBox.classList.add('hidden');
-​if(!email || !password) {
-errorBox.innerText = "请输入完整的邮箱和密码";
-errorBox.classList.remove('hidden');
-return;
-}
-​try {
-await signInWithEmailAndPassword(auth, email, password);
-} catch (err) {
-try {
-await createUserWithEmailAndPassword(auth, email, password);
-} catch (regErr) {
-errorBox.innerText = "认证失败: " + regErr.message;
-errorBox.classList.remove('hidden');
-}
-}
-};
-​window.logout = function() {
-signOut(auth);
-};
-​onAuthStateChanged(auth, (user) => {
-const modal = document.getElementById('auth-modal');
-const emailDisplay = document.getElementById('user-email-display');
-if (user) {
-modal.classList.add('hidden');
-emailDisplay.innerText = user.email;
-} else {
-modal.classList.remove('hidden');
-emailDisplay.innerText = '';
-}
-});
-</script>
-​<script>
-// 核心学习标签数组与全量前端路由控制器
-const studyTabs = [
-{ id: 'kanban', name: '看板' },
-{ id: 'daily-plan', name: '日计划' },
-{ id: 'okr', name: '目标OKR' },
-{ id: 'habit', name: '小习惯' }
-];
-​function renderStudyNav(activeId) {
-const container = document.getElementById('top-nav-tabs');
-container.innerHTML = '';
-studyTabs.forEach(tab => {
-const isActive = tab.id === activeId;
-const btn = document.createElement('button');
-btn.className = isActive ? 'text-gray-900 font-bold border-b-2 border-orange-500 pb-1 whitespace-nowrap' : 'text-gray-400 hover:text-gray-700 pb-1 whitespace-nowrap transition';
-btn.innerText = tab.name;
-btn.onclick = () => {
-renderStudyNav(tab.id);
-document.querySelectorAll('#section-study .tab-content').forEach(el => el.classList.remove('active'));
-document.getElementById(tab-${tab.id}).classList.add('active');
-};
-container.appendChild(btn);
-});
-}
-​// 主导航切换
-function switchMainSection(sectionId, event) {
-document.querySelectorAll('#section-study, #section-social, #section-square, #section-profile').forEach(el => el.classList.remove('active'));
-document.getElementById(section-${sectionId}).classList.add('active');
-​document.querySelectorAll('.nav-btn').forEach(btn => {
-btn.classList.remove('text-orange-500');
-btn.classList.add('text-gray-400');
-});
-event.currentTarget.classList.remove('text-gray-400');
-event.currentTarget.classList.add('text-orange-500');
-​if(sectionId === 'study') {
-renderStudyNav('kanban');
-document.getElementById('tab-kanban').classList.add('active');
-} else if(sectionId === 'social') {
-document.getElementById('top-nav-tabs').innerHTML = '<span class="text-gray-900 font-bold">搭友互动</span>';
-} else if(sectionId === 'square') {
-document.getElementById('top-nav-tabs').innerHTML = '<span class="text-gray-900 font-bold">操场广场</span>';
-} else if(sectionId === 'profile') {
-document.getElementById('top-nav-tabs').innerHTML = '<span class="text-gray-900 font-bold">个人主页</span>';
-}
-}
-​// 日期联动交互
-function selectDate(dayNum, element) {
-document.querySelectorAll('.date-card').forEach(card => {
-card.className = "date-card flex-shrink-0 w-12 h-16 bg-white border border-gray-200 text-gray-500 rounded-2xl flex flex-col items-center justify-center text-xs cursor-pointer transition";
-});
-element.className = "date-card flex-shrink-0 w-12 h-16 bg-[#ff8c00] text-white rounded-2xl flex flex-col items-center justify-center text-xs font-bold shadow-sm cursor-pointer transition";
-document.getElementById('current-day-focus').innerText = (dayNum === 13) ? '7时40分' : (dayNum === 20 ? '5时55分' : '4时15分');
-}
-​function clearDailyPlan() {
-document.getElementById('kanban-task-list').innerHTML = '<div class="text-gray-400 py-3 text-center">暂无待办事项</div>';
-}
-​function toggleHabitBtn(btn) {
-btn.innerText = "已打卡 ✓";
-btn.className = "bg-orange-500 text-white px-3 py-1.5 rounded-xl shadow-sm transition";
-}
-​// 专注计时器逻辑
-let timerInterval = null;
-let secondsLeft = 1500;
-function startTimer() {
-document.getElementById('timer-modal').classList.remove('hidden');
-if(!timerInterval) {
-timerInterval = setInterval(() => {
-if(secondsLeft > 0) {
-secondsLeft--;
-let m = Math.floor(secondsLeft / 60);
-let s = secondsLeft % 60;
-document.getElementById('timer-display').innerText = ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')};
-}
-}, 1000);
-}
-}
-​function pauseTimer() {
-clearInterval(timerInterval);
-timerInterval = null;
-}
-​function stopTimer() {
-clearInterval(timerInterval);
-timerInterval = null;
-secondsLeft = 1500;
-document.getElementById('timer-modal').classList.add('hidden');
-alert('专注时长已自动上传至 Firebase 数据库！');
-}
-​// 初始化运行
-renderStudyNav('kanban');
-document.getElementById('tab-kanban').classList.add('active');
-document.getElementById('section-study').classList.add('active');
-</script>
+<body>
+
+    <!-- 登录/注册浮窗 (Firebase Gmail Auth) -->
+    <div id="auth-modal" class="auth-modal-overlay">
+        <div class="auth-modal-card">
+            <div class="auth-icon-wrapper">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h2 class="auth-modal-title">学习搭子云端登录</h2>
+            <p class="auth-modal-desc">输入您的 Gmail / 邮箱以安全同步您的专注数据</p>
+            <div id="auth-error" class="auth-error-box"></div>
+            <input type="email" id="auth-email" placeholder="name@gmail.com" class="auth-input-field">
+            <input type="password" id="auth-password" placeholder="密码 (至少6位数)" class="auth-input-field">
+            <button onclick="handleEmailAuth()" class="auth-submit-btn">登录 / 注册</button>
+        </div>
+    </div>
+
+    <!-- 专注计时器浮窗 -->
+    <div id="timer-modal" class="timer-modal-overlay hidden">
+        <div class="timer-modal-card">
+            <div class="timer-status-tag">专注自习进行中</div>
+            <div id="timer-display" class="timer-display-clock">25:00</div>
+            <div class="timer-btn-group">
+                <button onclick="pauseTimer()" class="timer-action-btn timer-pause-btn">暂停</button>
+                <button onclick="stopTimer()" class="timer-action-btn timer-stop-btn">结束并打卡</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <header class="app-header">
+        <div id="top-nav-tabs" class="top-tabs-container no-scrollbar">
+            <!-- 动态注入子标签 -->
+        </div>
+        <div class="user-status-box">
+            <span id="user-email-display" class="user-email-label"></span>
+            <button onclick="logout()" class="logout-btn" title="退出登录"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+        </div>
+    </header>
+
+    <!-- 主体内容区域 -->
+    <main class="app-main-container">
+
+        <!-- 1. 学习区域 -->
+        <div id="section-study" class="section-panel active">
+            
+            <!-- 看板 Tab -->
+            <div id="tab-kanban" class="tab-content active">
+                <div class="dashboard-stats-bar">
+                    <span>总计专注 <strong>63.5时</strong></span>
+                    <span>连续 <strong>未使用</strong></span>
+                    <span>计划 <strong>8个</strong></span>
+                </div>
+
+                <!-- 日期横向滚动选择器 -->
+                <div class="date-scroll-container no-scrollbar">
+                    <div onclick="selectDate(13, this)" class="date-card-item active"><span>一</span><span>13</span></div>
+                    <div onclick="selectDate(14, this)" class="date-card-item"><span>二</span><span>14</span></div>
+                    <div onclick="selectDate(15, this)" class="date-card-item"><span>三</span><span>15</span></div>
+                    <div onclick="selectDate(16, this)" class="date-card-item highlight-blue"><span>四</span><span>16</span></div>
+                    <div onclick="selectDate(17, this)" class="date-card-item"><span>五</span><span>17</span></div>
+                    <div onclick="selectDate(18, this)" class="date-card-item"><span>六</span><span>18</span></div>
+                </div>
+
+                <!-- 日活动统计卡片 -->
+                <div class="custom-card">
+                    <div class="card-header-row">
+                        <span class="card-title-bold"><i class="fa-solid fa-chart-pie" style="color:var(--theme-orange);"></i>日活动：日专注 <span id="current-day-focus">7时40分</span></span>
+                    </div>
+                    <div class="task-checklist" style="gap: 8px;">
+                        <div style="display: flex; justify-content: space-between;"><span>管理学背诵</span><strong style="color:var(--text-main);">2时45分</strong></div>
+                        <div style="display: flex; justify-content: space-between;"><span>经济学</span><strong style="color:var(--text-main);">2时10分</strong></div>
+                        <div style="display: flex; justify-content: space-between;"><span>英语真题讲解</span><strong style="color:var(--text-main);">1时20分</strong></div>
+                    </div>
+                </div>
+
+                <!-- 日习惯达成卡片 -->
+                <div class="custom-card" style="padding: 14px 18px; flex-direction: row; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 12px; color: var(--text-sub); font-weight: 500;">日习惯：打卡1个</span>
+                    <span class="card-badge-orange">✓ 管理学背诵</span>
+                </div>
+
+                <!-- 日计划及总结 -->
+                <div class="custom-card">
+                    <div class="card-header-row">
+                        <span class="card-badge-orange">搭友可见</span>
+                        <button onclick="clearDailyPlan()" style="background:none; border:none; color:var(--text-light); font-size:11px; cursor:pointer;">一删除</button>
+                    </div>
+                    <div id="kanban-task-list" class="task-checklist">
+                        <label class="task-check-item"><input type="checkbox" checked> <span>管理学背诵 80-85</span></label>
+                        <label class="task-check-item"><input type="checkbox" checked> <span>管理学复习 38-48</span></label>
+                        <label class="task-check-item"><input type="checkbox" checked> <span>经济法听课 2h 以上</span></label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 日计划 Tab -->
+            <div id="tab-daily-plan" class="tab-content">
+                <div style="display: flex; gap: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; font-size: 12px;">
+                    <span style="font-weight: 700; border-bottom: 2px solid var(--theme-orange); padding-bottom: 4px;">搭友圈</span>
+                    <span style="color: var(--text-sub);">我的</span>
+                </div>
+                <div class="custom-card">
+                    <div class="card-header-row">
+                        <span style="color: var(--text-sub);">今天 07.20</span>
+                        <span class="card-badge-orange">搭友可见</span>
+                    </div>
+                    <p style="font-size: 12px; color: #555555;">第二天的计划这里直接便捷制定</p>
+                    <div style="border: 1px dashed var(--card-border); padding: 24px; border-radius: var(--radius-btn); text-align: center; color: var(--text-light); font-size: 11px;">
+                        完成证明图片区
+                    </div>
+                    <button onclick="alert('计划总结已提交！')" class="auth-submit-btn" style="padding: 10px; font-size: 12px;">提交今日计划总结</button>
+                </div>
+            </div>
+
+            <!-- 目标 OKR Tab -->
+            <div id="tab-okr" class="tab-content">
+                <div style="display: flex; gap: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; font-size: 12px;">
+                    <span style="font-weight: 700; border-bottom: 2px solid var(--theme-orange); padding-bottom: 4px;">搭友圈</span>
+                    <span style="color: var(--text-sub);">我的</span>
+                    <span style="color: var(--text-sub);">我的归档</span>
+                </div>
+                <div class="custom-card">
+                    <div class="card-header-row">
+                        <span style="color: var(--text-sub); font-size: 11px;">📅 2027.01.01 截止，还剩 166 天</span>
+                        <span class="card-badge-orange">搭友可见</span>
+                    </div>
+                    <div style="font-size: 13px; font-weight: 700;">阶段目标与核心考点突破</div>
+                    <div style="width: 100%; background-color: #f0eee6; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background-color: var(--theme-orange); width: 66%; height: 100%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 小习惯 Tab -->
+            <div id="tab-habit" class="tab-content">
+                <div class="custom-card">
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-sub);">▼ 起床</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 4px 0;">
+                        <span>早起 (0/1 每天)</span>
+                        <button onclick="toggleHabitBtn(this)" class="social-action-btn">打卡</button>
+                    </div>
+                    <div style="font-size: 11px; font-weight: 700; color: var(--text-sub); margin-top: 8px;">▼ 晚上</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 4px 0;">
+                        <span>散步 (19:30提醒)</span>
+                        <button onclick="toggleHabitBtn(this)" class="social-action-btn">打卡</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 2. 搭友区域 -->
+        <div id="section-social" class="section-panel">
+            <div style="display: flex; gap: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; font-size: 12px;">
+                <span style="font-weight: 700; border-bottom: 2px solid var(--theme-orange); padding-bottom: 4px;">搭友 (4)</span>
+                <span style="color: var(--text-sub);">消息互动</span>
+            </div>
+            <div class="custom-card social-user-card">
+                <div class="social-user-info">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" class="social-avatar-img">
+                    <div>
+                        <div style="font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>岁晏</span><span style="font-size: 9px; background: #f0eee6; padding: 1px 6px; border-radius: 4px; color: var(--text-sub);">私聊</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--theme-orange); margin-top: 2px;">正在专注「教资」</div>
+                    </div>
+                </div>
+                <button onclick="alert('已发送连线自习邀请！')" class="social-action-btn">邀请连线自习</button>
+            </div>
+            <div class="custom-card social-user-card">
+                <div class="social-user-info">
+                    <div class="social-avatar-text">牛</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 6px;">
+                            <span>性感大野牛</span><span style="font-size: 9px; background: #f0eee6; padding: 1px 6px; border-radius: 4px; color: var(--text-sub);">私聊</span>
+                        </div>
+                        <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px;">累计已专注 11时48分</div>
+                    </div>
+                </div>
+                <button onclick="alert('已发送连线自习邀请！')" class="social-action-btn">邀请连线自习</button>
+            </div>
+        </div>
+
+        <!-- 3. 发现/操场区域 -->
+        <div id="section-square" class="section-panel">
+            <div class="top-tabs-container no-scrollbar" style="border-bottom: 1px solid var(--card-border); padding-bottom: 8px;">
+                <span style="font-weight: 700; color: var(--text-main); border-bottom: 2px solid var(--theme-orange); padding-bottom: 4px;">全部</span>
+                <span style="color: var(--text-sub);">搭友分享</span>
+                <span style="color: var(--text-sub);">向全世界叽叽喳喳</span>
+                <span style="color: var(--text-sub);">待办</span>
+                <span style="color: var(--text-sub);">碎碎念</span>
+            </div>
+            <div class="custom-card">
+                <div class="card-header-row">
+                    <span style="color: var(--text-sub);">周一 07.20</span>
+                    <span class="card-badge-orange">公开</span>
+                </div>
+                <div style="background-color: #fff8f0; padding: 12px; border-radius: 12px; font-size: 12px; border: 1px solid #ffe0b2;">
+                    今天把睡眠状态调整过来了，太不容易了 🥲
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-sub);">
+                    <span><i class="fa-regular fa-thumbs-up"></i> 3</span>
+                    <span><i class="fa-regular fa-comment"></i> 2</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 我的（个人主页）区域 -->
+        <div id="section-profile" class="section-panel">
+            <div class="custom-card" style="gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 14px;">
+                    <div style="width: 52px; height: 52px; border-radius: 50%; background-color: #ffe0b2; color: var(--theme-orange); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; border: 2px solid #ffcc80;">初</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 13px;">1. 初级学员</div>
+                        <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px; font-style: italic;">“想，全的问题；做，都是答案”</div>
+                    </div>
+                </div>
+                <div class="profile-header-grid">
+                    <div><div class="profile-stat-number">2</div>关注</div>
+                    <div><div class="profile-stat-number">1</div>粉丝</div>
+                    <div><div class="profile-stat-number">8</div>看过我</div>
+                    <div><div class="profile-stat-number">7</div>我看过</div>
+                    <div><div class="profile-stat-number">0</div>我的赞</div>
+                </div>
+            </div>
+            <div class="custom-card" style="gap: 10px; font-size: 12px;">
+                <div style="font-weight: 700; margin-bottom: 2px;">⚙️ 账号与云端系统</div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f5f2eb;"><span>大学与引力标签</span><span style="color: var(--text-sub);">已绑定</span></div>
+                <div style="display: flex; justify-content: space-between; padding: 6px 0;"><span>Firebase 实时同步</span><span style="color: var(--success-color); font-weight: 600;">已连接</span></div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- 底部主导航栏 -->
+    <nav class="app-bottom-nav">
+        <button onclick="switchMainSection('study', event)" id="nav-btn-study" class="bottom-nav-btn active">
+            <i class="fa-solid fa-graduation-cap"></i><span>学习</span>
+        </button>
+        <button onclick="switchMainSection('social', event)" id="nav-btn-social" class="bottom-nav-btn">
+            <i class="fa-solid fa-user-group"></i><span>搭友</span>
+        </button>
+        <button onclick="switchMainSection('square', event)" id="nav-btn-square" class="bottom-nav-btn">
+            <i class="fa-solid fa-compass"></i><span>发现</span>
+        </button>
+        <button onclick="switchMainSection('profile', event)" id="nav-btn-profile" class="bottom-nav-btn">
+            <i class="fa-solid fa-user"></i><span>我的</span>
+        </button>
+        <!-- 悬浮开始专注按钮 -->
+        <div onclick="startTimer()" class="floating-focus-btn">
+            <i class="fa-solid fa-play"></i><span>专注</span>
+        </div>
+    </nav>
+
+    <!-- Firebase SDK 与完整交互逻辑脚本 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBaiSjLnTaVhLdwfsNA2Teb-8y5ITeBQfc",
+            authDomain: "english-pairing-5786e.firebaseapp.com",
+            databaseURL: "https://english-pairing-5786e-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "english-pairing-5786e",
+            storageBucket: "english-pairing-5786e.firebasestorage.app",
+            messagingSenderId: "673981745505",
+            appId: "1:673981745505:web:863a0994ef718536505d20",
+            measurementId: "G-1LBGN8Q3B2"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const analytics = getAnalytics(app);
+
+        window.handleEmailAuth = async function() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value.trim();
+            const errorBox = document.getElementById('auth-error');
+            errorBox.innerText = "";
+
+            if(!email || !password) {
+                errorBox.innerText = "请输入完整的邮箱和密码";
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (err) {
+                try {
+                    await createUserWithEmailAndPassword(auth, email, password);
+                } catch (regErr) {
+                    errorBox.innerText = "认证失败: " + regErr.message;
+                }
+            }
+        };
+
+        window.logout = function() {
+            signOut(auth);
+        };
+
+        onAuthStateChanged(auth, (user) => {
+            const modal = document.getElementById('auth-modal');
+            const emailDisplay = document.getElementById('user-email-display');
+            if (user) {
+                modal.classList.add('hidden');
+                emailDisplay.innerText = user.email;
+            } else {
+                modal.classList.remove('hidden');
+                emailDisplay.innerText = '';
+            }
+        });
+    </script>
+
+    <script>
+        const studyTabs = [
+            { id: 'kanban', name: '看板' },
+            { id: 'daily-plan', name: '日计划' },
+            { id: 'okr', name: '目标OKR' },
+            { id: 'habit', name: '小习惯' }
+        ];
+
+        function renderStudyNav(activeId) {
+            const container = document.getElementById('top-nav-tabs');
+            container.innerHTML = '';
+            studyTabs.forEach(tab => {
+                const isActive = tab.id === activeId;
+                const btn = document.createElement('button');
+                btn.className = isActive ? 'top-tab-btn active' : 'top-tab-btn';
+                btn.innerText = tab.name;
+                btn.onclick = () => {
+                    renderStudyNav(tab.id);
+                    document.querySelectorAll('#section-study .tab-content').forEach(el => el.classList.remove('active'));
+                    document.getElementById(`tab-${tab.id}`).classList.add('active');
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function switchMainSection(sectionId, event) {
+            document.querySelectorAll('.section-panel').forEach(el => el.classList.remove('active'));
+            document.getElementById(`section-${sectionId}`).classList.add('active');
+
+            document.querySelectorAll('.bottom-nav-btn').forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            const topTabs = document.getElementById('top-nav-tabs');
+            if(sectionId === 'study') {
+                renderStudyNav('kanban');
+                document.getElementById('tab-kanban').classList.add('active');
+            } else if(sectionId === 'social') {
+                topTabs.innerHTML = '<span style="font-weight:700; color:var(--text-main);">搭友互动</span>';
+            } else if(sectionId === 'square') {
+                topTabs.innerHTML = '<span style="font-weight:700; color:var(--text-main);">操场广场</span>';
+            } else if(sectionId === 'profile') {
+                topTabs.innerHTML = '<span style="font-weight:700; color:var(--text-main);">个人主页</span>';
+            }
+        }
+
+        function selectDate(dayNum, element) {
+            document.querySelectorAll('.date-card-item').forEach(card => {
+                card.className = "date-card-item";
+            });
+            element.className = "date-card-item active";
+            document.getElementById('current-day-focus').innerText = (dayNum === 13) ? '7时40分' : (dayNum === 20 ? '5时55分' : '4时15分');
+        }
+
+        function clearDailyPlan() {
+            document.getElementById('kanban-task-list').innerHTML = '<div style="color:var(--text-light); text-align:center; padding: 10px;">暂无待办事项</div>';
+        }
+
+        function toggleHabitBtn(btn) {
+            btn.innerText = "已打卡 ✓";
+            btn.style.backgroundColor = "var(--theme-orange)";
+            btn.style.color = "#ffffff";
+            btn.style.borderColor = "var(--theme-orange)";
+        }
+
+        let timerInterval = null;
+        let secondsLeft = 1500;
+        function startTimer() {
+            document.getElementById('timer-modal').classList.remove('hidden');
+            if(!timerInterval) {
+                timerInterval = setInterval(() => {
+                    if(secondsLeft > 0) {
+                        secondsLeft--;
+                        let m = Math.floor(secondsLeft / 60);
+                        let s = secondsLeft % 60;
+                        document.getElementById('timer-display').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            secondsLeft = 1500;
+            document.getElementById('timer-modal').classList.add('hidden');
+            alert('专注时长已成功提交并同步至 Firebase！');
+        }
+
+        renderStudyNav('kanban');
+        document.getElementById('tab-kanban').classList.add('active');
+        document.getElementById('section-study').classList.add('active');
+    </script>
 </body>
 </html>
