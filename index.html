@@ -1,256 +1,1829 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>学习搭子</title>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>学习搭子 · Study Partner</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-:root{--bg:#f7f4ed;--card:#fff;--bd:#eee8df;--or:#ff8c00;--tx:#333;--sub:#888;--ok:#52c41a;--bad:#ff4d4d}
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1e1c19;--card:#2a2723;--bd:#3a362f;--tx:#eee;--sub:#aaa}}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{background:var(--bg);color:var(--tx);font-family:-apple-system,"Segoe UI",Roboto,sans-serif}
-body{min-height:100vh;padding-top:env(safe-area-inset-top,0);padding-bottom:calc(90px + env(safe-area-inset-bottom,0))}
-button{font:inherit;cursor:pointer;color:inherit}
-.wrap{max-width:440px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:14px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 18px rgba(0,0,0,.05)}
-.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.sub{color:var(--sub);font-size:12px}
-.tabs{display:flex;gap:18px;overflow-x:auto;padding:6px 14px;max-width:440px;margin:0 auto;position:sticky;top:env(safe-area-inset-top,0);background:var(--bg);z-index:5}
-.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:6px 0;color:var(--sub);white-space:nowrap;font-size:14px}
-.tabs button.on{color:var(--tx);font-weight:700;border-color:var(--or)}
-.btn{background:var(--or);color:#fff;border:0;border-radius:14px;padding:12px;font-weight:600;width:100%}
-.btn.g{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
-.tag{background:#fff3e0;color:var(--or);border:1px solid #ffe0b2;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:600}
-input,textarea{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:12px;font:inherit;font-size:14px;outline:none}
-input:focus,textarea:focus{border-color:var(--or)}
-.dates{display:flex;gap:8px;overflow-x:auto}
-.d{flex:0 0 50px;height:66px;border-radius:18px;border:1px solid var(--bd);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;color:var(--sub)}
-.d b{font-size:15px;color:var(--tx)}.d.on{background:var(--or);border-color:var(--or);color:#fff}.d.on b{color:#fff}
-.bar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--or)}
-nav{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;background:var(--bg);border-top:1px solid var(--bd);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom,0));z-index:10}
-nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--sub)}
-nav button span{font-size:19px}nav button.on{color:var(--or);font-weight:700}
-.fab{position:fixed;right:max(16px,calc(50% - 204px));bottom:calc(76px + env(safe-area-inset-bottom,0));width:54px;height:54px;border-radius:50%;background:var(--or);color:#fff;border:3px solid var(--bg);font-size:11px;font-weight:700;z-index:11;box-shadow:0 8px 20px rgba(255,140,0,.45)}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
-.modal.h{display:none}
-.box{background:var(--card);border-radius:24px;padding:24px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
-.clock{font:800 54px monospace;text-align:center}
-.msg{padding:8px 12px;border-radius:12px;max-width:80%;font-size:13px;background:var(--bg)}.msg.me{align-self:flex-end;background:var(--or);color:#fff}
-.panel{display:none;flex-direction:column;gap:14px}.panel.on{display:flex}
-.av{width:42px;height:42px;border-radius:50%;background:#ffe0b2;color:var(--or);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
-.hero{background:radial-gradient(circle at 20% 30%,#86b072 0,transparent 40%),radial-gradient(circle at 80% 65%,#5a874b 0,transparent 45%),#6f9a5e;color:#fff;padding:calc(18px + env(safe-area-inset-top,0)) 16px 16px;margin:-14px -14px 0;display:flex;flex-direction:column;gap:12px}
-.hero .st{display:flex;text-align:center}.hero .st div{flex:1;font-size:11px;opacity:.9}.hero .st b{display:block;font-size:20px}
-.hero .chip{background:rgba(255,255,255,.22);border-radius:14px;padding:4px 12px;font-size:12px;border:0;color:#fff}
-.vip{background:#3b3a36;color:#f5deb3;margin:0 -14px;padding:14px 16px;display:flex;justify-content:space-between;font-size:14px}
-.cats{display:flex;gap:16px;overflow-x:auto;padding:4px 0}.cats button{background:none;border:0;border-bottom:2px solid transparent;color:var(--sub);white-space:nowrap;padding-bottom:4px;font-size:14px;text-align:center}
-.cats button small{display:block;font-size:10px}.cats button.on{color:var(--or);border-color:var(--or);font-weight:700}
-.tl{display:flex;gap:10px}.tl .dt{width:44px;flex:none;font-size:12px;font-weight:600}.tl .dt small{display:block;color:var(--sub);font-weight:400;font-size:10px}
-.bub{background:#c9b8f5;color:#333;border-radius:18px;padding:10px 14px;font-size:14px;align-self:flex-start}
-select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:12px;font:inherit;font-size:14px}
+:root{
+  --primary:#ff8c00;--primary-h:#e07b00;--primary-l:#fff3e0;
+  --bg:#f7f8fa;--card:#fff;--text:#1a1a1a;--sub:#666;--light:#999;
+  --border:#f0f0f0;--input:#e0e0e0;
+  --danger:#ff4d4d;--success:#52c41a;--info:#1677ff;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.04);
+  --shadow-md:0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 24px rgba(0,0,0,.12);
+  --r-sm:8px;--r-md:16px;--r-lg:24px;--r-full:9999px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh;display:flex;justify-content:center;overflow-x:hidden}
+input,textarea,button,select{font-family:inherit;font-size:inherit;outline:none;border:none}
+input,textarea{user-select:text;-webkit-user-select:text}
+ul,ol{list-style:none}a{text-decoration:none;color:inherit}
+::-webkit-scrollbar{width:0;background:transparent}
+
+/* App Container */
+#app{width:100%;max-width:480px;background:var(--bg);min-height:100vh;position:relative;display:none;flex-direction:column;box-shadow:0 0 30px rgba(0,0,0,.05);padding-bottom:80px;overflow:hidden}
+
+/* Auth Screen */
+#auth{position:fixed;inset:0;background:var(--card);z-index:9999;display:flex;flex-direction:column;justify-content:center;padding:32px;max-width:480px;margin:0 auto}
+.auth-logo{width:80px;height:80px;background:var(--primary-l);color:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 16px;box-shadow:var(--shadow-md)}
+.auth-header{text-align:center;margin-bottom:32px}
+.auth-header h1{font-size:26px;font-weight:800;margin-bottom:8px;letter-spacing:1px}
+.auth-header p{font-size:14px;color:var(--sub)}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:8px}
+.form-input{width:100%;padding:14px;background:#f9f9f9;border:1px solid var(--input);border-radius:var(--r-md);font-size:15px;transition:all .25s}
+.form-input:focus{border-color:var(--primary);background:var(--card);box-shadow:0 0 0 4px rgba(255,140,0,.1)}
+.btn{width:100%;padding:16px;border-radius:var(--r-md);font-size:15px;font-weight:700;cursor:pointer;transition:all .25s}
+.btn.primary{background:var(--primary);color:#fff;box-shadow:0 4px 14px rgba(255,140,0,.3)}
+.btn.primary:hover{background:var(--primary-h)}
+.btn.ghost{background:transparent;color:var(--primary);border:1px solid var(--primary);margin-top:10px}
+.btn.google{background:#fff;color:#444;border:1px solid var(--input);display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px}
+.btn.google img{width:20px;height:20px}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.auth-error{color:var(--danger);font-size:13px;margin-bottom:12px;padding:10px;background:#fff2f0;border:1px solid #ffccc7;border-radius:var(--r-sm);display:none;text-align:center}
+
+/* Onboarding / Edit Profile Modal */
+#onboard{position:fixed;inset:0;background:var(--card);z-index:9998;display:none;flex-direction:column;padding:32px;max-width:480px;margin:0 auto;overflow-y:auto}
+.interest-grid{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0 24px}
+.interest-chip{padding:8px 16px;border:1px solid var(--input);border-radius:var(--r-full);font-size:13px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.interest-chip.selected{background:var(--primary);color:#fff;border-color:var(--primary)}
+.interest-chip i{cursor:pointer;font-size:11px;opacity:.8}
+.interest-chip i:hover{opacity:1}
+
+/* Top Nav */
+.top-nav{display:flex;justify-content:space-around;align-items:center;padding:14px 0;background:var(--card);position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);overflow-x:auto}
+.top-nav::-webkit-scrollbar{display:none}
+.top-nav-item{font-size:14px;font-weight:500;color:var(--sub);padding:6px 12px;cursor:pointer;white-space:nowrap;position:relative;transition:color .25s}
+.top-nav-item.active{color:var(--text);font-weight:700}
+.top-nav-item.active::after{content:'';position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:var(--primary);border-radius:2px}
+
+/* Content */
+.content-area{flex:1;overflow-y:auto;padding:16px;display:none;flex-direction:column;gap:16px}
+.content-area.active{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.sub-content{display:none;flex-direction:column;gap:16px}
+.sub-content.active{display:flex}
+
+/* Card */
+.card{background:var(--card);border-radius:var(--r-md);padding:18px;box-shadow:var(--shadow-sm);border:1px solid var(--border)}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.card-title{font-size:15px;font-weight:700}
+.badge{font-size:11px;padding:4px 10px;border-radius:var(--r-full);font-weight:600;white-space:nowrap}
+.badge-orange{background:var(--primary-l);color:var(--primary)}
+.badge-blue{background:#e6f4ff;color:var(--info)}
+.badge-admin{background:#f6ffed;color:var(--success);border:1px solid #b7eb8f}
+.badge-danger{background:#fff2f0;color:var(--danger)}
+
+/* Donut Chart */
+.donut-wrap{display:flex;flex-direction:column;align-items:center;padding:12px 0}
+.donut{width:170px;height:170px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md);transition:background .5s ease}
+.donut-inner{width:120px;height:120px;background:var(--card);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-value{font-size:22px;font-weight:800}
+.donut-label{font-size:11px;color:var(--sub)}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:14px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--sub)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+
+/* Buddy Item */
+.buddy-item{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:14px;border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:10px}
+.buddy-info{display:flex;align-items:center;gap:12px;flex:1}
+.buddy-avatar{width:48px;height:48px;border-radius:50%;background:var(--primary-l);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;flex-shrink:0;overflow:hidden}
+.buddy-avatar img{width:100%;height:100%;object-fit:cover}
+.buddy-text h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.buddy-text p{font-size:12px;color:var(--sub)}
+.buddy-actions{display:flex;gap:6px}
+.icon-btn{background:var(--primary-l);color:var(--primary);border:none;padding:6px 10px;border-radius:var(--r-full);font-size:11px;font-weight:600;cursor:pointer}
+.icon-btn:hover{background:#ffe0b2}
+
+/* Habit & OKR */
+.habit-item{display:flex;align-items:center;justify-content:space-between;background:var(--card);padding:14px;border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:10px}
+.habit-icon{width:40px;height:40px;border-radius:50%;background:var(--primary-l);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.habit-info{flex:1;margin-left:12px}
+.habit-info h4{font-size:14px;font-weight:600}
+.habit-info p{font-size:12px;color:var(--sub);margin-top:2px}
+.habit-btn{background:var(--bg);border:1px solid var(--input);padding:8px 16px;border-radius:var(--r-full);font-size:12px;font-weight:600;color:var(--sub);cursor:pointer}
+.habit-btn.checked{background:#f6ffed;color:var(--success);border-color:#b7eb8f}
+.habit-btn:hover{border-color:var(--primary);color:var(--primary)}
+.btn-text{background:none;border:none;font-size:12px;font-weight:600;cursor:pointer;padding:4px 8px;border-radius:var(--r-sm);color:var(--primary)}
+.btn-text.danger{color:var(--danger)}
+
+.okr-card{background:var(--card);padding:16px;border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:10px}
+.okr-head{display:flex;justify-content:space-between;font-size:12px;color:var(--sub);margin-bottom:8px}
+.okr-title{font-size:14px;font-weight:700;margin-bottom:10px}
+.progress{height:8px;background:var(--border);border-radius:var(--r-full);overflow:hidden}
+.progress-fill{height:100%;background:var(--primary);border-radius:var(--r-full);transition:width .6s}
+
+/* Plan Timeline */
+.plan-list{display:flex;flex-direction:column;gap:14px}
+.plan-item{background:var(--card);padding:14px;border-radius:var(--r-md);border:1px solid var(--border)}
+.plan-date{font-size:12px;color:var(--sub);margin-bottom:8px;display:flex;justify-content:space-between}
+.plan-content{font-size:14px;line-height:1.6;margin-bottom:8px;white-space:pre-wrap}
+.plan-img{width:100%;border-radius:var(--r-sm);margin-top:8px}
+.plan-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+
+/* Feed */
+.feed-item{background:var(--card);padding:16px;border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:12px}
+.feed-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.feed-user{display:flex;align-items:center;gap:10px}
+.feed-avatar{width:36px;height:36px;border-radius:50%;background:var(--primary-l);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;overflow:hidden}
+.feed-avatar img{width:100%;height:100%;object-fit:cover}
+.feed-name{font-size:13px;font-weight:700}
+.feed-time{font-size:11px;color:var(--light)}
+.feed-body{font-size:14px;line-height:1.6;margin-bottom:12px;white-space:pre-wrap}
+.feed-actions{display:flex;gap:20px;font-size:12px;color:var(--sub);border-top:1px solid var(--border);padding-top:10px}
+.feed-action{background:none;border:none;color:var(--sub);cursor:pointer;display:flex;align-items:center;gap:5px;font-size:12px}
+.feed-action.liked{color:var(--primary)}
+
+/* Profile (Xiaohongshu style) */
+.profile-hero{background:linear-gradient(135deg,#ff8c00 0%,#ffb347 100%);color:#fff;border-radius:var(--r-md);padding:24px;margin-bottom:14px;position:relative;overflow:hidden}
+.profile-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:150px;height:150px;background:rgba(255,255,255,.1);border-radius:50%}
+.profile-avatar-lg{width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.3);border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;overflow:hidden;position:relative;z-index:1}
+.profile-avatar-lg img{width:100%;height:100%;object-fit:cover}
+.profile-name{font-size:20px;font-weight:800;margin-top:12px;position:relative;z-index:1}
+.profile-email{font-size:12px;opacity:.9;margin-top:2px;position:relative;z-index:1}
+.profile-edit-btn{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.25);color:#fff;border:none;padding:6px 14px;border-radius:var(--r-full);font-size:12px;font-weight:600;cursor:pointer;z-index:2}
+.profile-edit-btn:hover{background:rgba(255,255,255,.4)}
+.profile-stats{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;background:var(--card);padding:16px;border-radius:var(--r-md);border:1px solid var(--border);margin-bottom:14px}
+.stat-v{font-size:18px;font-weight:800}
+.stat-l{font-size:11px;color:var(--sub);margin-top:2px}
+.xhs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:14px}
+.xhs-cell{aspect-ratio:1;background:var(--border);border-radius:4px;overflow:hidden;position:relative;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--light);font-size:20px}
+.xhs-cell img{width:100%;height:100%;object-fit:cover}
+
+/* Bottom Nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--card);display:flex;justify-content:space-around;padding:10px 0 calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--border);z-index:999;box-shadow:0 -2px 10px rgba(0,0,0,.03)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;font-weight:600;color:var(--light);cursor:pointer;flex:1;transition:color .2s}
+.nav-item i{font-size:20px}
+.nav-item.active{color:var(--primary)}
+
+/* FAB */
+.fab{position:fixed;bottom:90px;right:calc(50% - 220px);width:60px;height:60px;background:var(--primary);color:#fff;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:700;box-shadow:0 6px 16px rgba(255,140,0,.4);cursor:pointer;z-index:1000;border:3px solid var(--bg)}
+.fab i{font-size:20px;margin-bottom:2px}
+@media(max-width:480px){.fab{right:20px}}
+
+/* Modals */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:2000;display:none;align-items:flex-end;justify-content:center}
+.modal.active{display:flex}
+.modal-content{background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:24px;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.16,1,.3,1)}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-head h3{font-size:17px;font-weight:800}
+.close-btn{background:var(--bg);border:none;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--sub);cursor:pointer}
+textarea.form-input{resize:vertical;min-height:90px}
+.upload-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:var(--bg);border:1px dashed var(--input);border-radius:var(--r-md);font-size:14px;color:var(--sub);font-weight:600;cursor:pointer;position:relative;overflow:hidden}
+.upload-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.img-preview{width:100%;border-radius:var(--r-md);margin-top:10px;display:none}
+
+/* Chat */
+#chatModal .modal-content{height:85vh;padding:0;display:flex;flex-direction:column}
+.chat-head{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border)}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px;background:var(--bg);display:flex;flex-direction:column;gap:10px}
+.bubble{max-width:78%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-wrap:break-word}
+.bubble.them{align-self:flex-start;background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
+.bubble.me{align-self:flex-end;background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.bubble img{max-width:100%;border-radius:10px;margin-top:6px;display:block}
+.chat-input{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:1px solid var(--border)}
+.chat-input input[type="text"]{flex:1;padding:10px 14px;border-radius:var(--r-full);background:var(--bg);border:1px solid var(--input);font-size:14px}
+.chat-btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;border:none}
+.chat-btn.attach{background:var(--bg);color:var(--sub)}
+.chat-btn.send{background:var(--primary);color:#fff}
+
+/* Call / Study Room */
+#callModal .modal-content,#roomModal .modal-content{height:100vh;max-height:100vh;border-radius:0;padding:0;background:#111;color:#fff;display:flex;flex-direction:column}
+.video-stage{flex:1;position:relative;background:#000;overflow:hidden}
+.video-stage video{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0}
+.video-stage .local{width:110px;height:150px;border-radius:12px;bottom:20px;right:20px;top:auto;left:auto;border:2px solid rgba(255,255,255,.4);z-index:2}
+.video-stage .remote{position:absolute;inset:0;z-index:1}
+.call-info{position:absolute;top:40px;left:0;right:0;text-align:center;z-index:3;pointer-events:none}
+.call-info h3{font-size:22px;font-weight:700;text-shadow:0 2px 6px rgba(0,0,0,.6)}
+.call-info p{font-size:13px;color:#ccc;margin-top:4px}
+.call-ctrl{position:absolute;bottom:40px;left:0;right:0;display:flex;justify-content:center;gap:14px;z-index:4}
+.call-btn{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;border:none;background:rgba(255,255,255,.2);color:#fff;transition:all .2s}
+.call-btn.danger{background:var(--danger)}
+.call-btn.active{background:var(--primary)}
+.call-btn:hover{transform:scale(1.08)}
+
+/* Timer */
+.timer-display{font-family:'Courier New',monospace;font-size:64px;font-weight:800;text-align:center;margin:30px 0;letter-spacing:2px}
+.timer-controls{display:flex;justify-content:center;gap:14px;margin-bottom:20px}
+.timer-btn{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;border:none;transition:transform .15s}
+.timer-btn:active{transform:scale(.9)}
+.music-selector{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0}
+.music-chip{padding:8px 14px;border-radius:var(--r-full);border:1px solid var(--input);font-size:12px;cursor:pointer;background:var(--bg);color:var(--sub)}
+.music-chip.selected{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* Toast */
+#toast-wrap{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{background:rgba(26,26,26,.92);color:#fff;padding:11px 20px;border-radius:var(--r-full);font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.15);animation:toastIn .3s,toastOut .3s 2.7s}
+.toast.success{background:rgba(82,196,26,.95)}
+.toast.error{background:rgba(255,77,77,.95)}
+@keyframes toastIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(20px)}}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;background:var(--card);border-radius:var(--r-md);border:1px dashed var(--input);color:var(--light)}
+.empty-state i{font-size:42px;margin-bottom:12px}
+.empty-state p{font-size:13px}
+
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.utility-flex{display:flex;align-items:center;gap:8px}
+.utility-between{display:flex;justify-content:space-between;align-items:center}
+.hidden{display:none!important}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.js"></script>
-</head><body>
+</head>
+<body>
 
-<div id="auth" class="modal"><div class="box">
-<h2 style="text-align:center">🎓 学习搭子</h2>
-<button class="btn g" onclick="gLogin()">🔵 使用 Google 登录</button>
-<div class="sub" style="text-align:center">— 或使用邮箱密码 —</div>
-<input id="em" type="email" placeholder="邮箱"><input id="pw" type="password" placeholder="密码（至少6位）"><input id="nm" placeholder="昵称（注册时填写）">
-<div id="ae" class="sub" style="color:var(--bad)"></div>
-<button class="btn" onclick="emailAuth(false)">登录</button><button class="btn g" onclick="emailAuth(true)">注册新账号</button>
-<button class="btn g" onclick="resetPw()">忘记密码</button></div></div>
+<!-- ================= AUTH ================= -->
+<div id="auth">
+  <div class="auth-header">
+    <div class="auth-logo"><i class="fa-solid fa-graduation-cap"></i></div>
+    <h1>学习搭子</h1>
+    <p>Study Partner · 专注 · 连接 · 成长</p>
+  </div>
+  <div id="authError" class="auth-error"></div>
+  <div class="form-group">
+    <label>邮箱</label>
+    <input id="authEmail" type="email" class="form-input" placeholder="you@example.com" autocomplete="email">
+  </div>
+  <div class="form-group">
+    <label>密码</label>
+    <input id="authPassword" type="password" class="form-input" placeholder="至少 6 位" autocomplete="current-password">
+  </div>
+  <button id="loginBtn" class="btn primary">登 录</button>
+  <button id="signupBtn" class="btn ghost">注册新账号</button>
+  <button id="googleBtn" class="btn google">
+    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="G">
+    使用 Google 账号登录
+  </button>
+</div>
 
-<div id="timer" class="modal h"><div class="box">
-<div class="sub" style="text-align:center">专注自习中</div>
-<div id="clk" class="clock">25:00</div>
-<input id="subj" placeholder="学习科目，如：经济学">
-<div class="row"><button class="btn g" id="pz" onclick="pauseT()">暂停</button><button class="btn g" onclick="setMin()">改时长</button><button class="btn g" id="nz" onclick="noise()">🎵 白噪音：关</button></div>
-<button class="btn" style="background:var(--bad)" onclick="endT()">结束并打卡</button>
-<button class="btn g" onclick="cancelT()">放弃</button></div></div>
+<!-- ================= ONBOARDING ================= -->
+<div id="onboard">
+  <div class="auth-header">
+    <div class="auth-logo"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+    <h1>完善资料</h1>
+    <p>用于 AI 智能匹配和你同频的搭子</p>
+  </div>
+  <div class="form-group">
+    <label>昵称</label>
+    <input id="onName" type="text" class="form-input" placeholder="你希望别人叫你什么">
+  </div>
+  <div class="form-group">
+    <label>城市 / 位置（用于同城匹配）</label>
+    <input id="onCity" type="text" class="form-input" placeholder="例如：吉隆坡 / KL / 北京">
+  </div>
+  <div class="form-group">
+    <label>兴趣标签（多选，用于 AI 匹配）</label>
+    <div id="interestGrid" class="interest-grid">
+      <!-- Rendered by JS -->
+    </div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <input id="customInterestInput" class="form-input" style="flex:1" placeholder="自定义兴趣...">
+      <button id="addCustomInterestBtn" class="icon-btn" style="padding:0 16px;">添加</button>
+    </div>
+  </div>
+  <button id="onDone" class="btn primary">开始使用</button>
+</div>
 
-<div id="form" class="modal h"><div class="box">
-<h3 id="ft"></h3><input id="f1"><input id="f2" type="date" style="display:none"><select id="f3" style="display:none"><option>碎碎念</option><option>树洞</option><option>待办</option><option>搭友分享</option><option>向全世界叽叽喳喳</option></select>
-<div class="row"><button class="btn g" onclick="$('form').classList.add('h')">取消</button><button class="btn" onclick="submitForm()">保存</button></div></div></div>
+<!-- ================= EDIT PROFILE MODAL ================= -->
+<div class="modal" id="editProfileModal">
+  <div class="modal-content">
+    <div class="modal-head"><h3>编辑资料</h3><button class="close-btn" data-close="editProfileModal"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="form-group">
+      <label>昵称</label>
+      <input id="editName" type="text" class="form-input">
+    </div>
+    <div class="form-group">
+      <label>城市 / 位置（例如：吉隆坡 / KL）</label>
+      <input id="editCity" type="text" class="form-input" placeholder="输入城市，如：吉隆坡 / KL">
+    </div>
+    <div class="form-group">
+      <label>我的兴趣（可添加 / 删除）</label>
+      <div id="editInterestGrid" class="interest-grid"></div>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <input id="editCustomInterestInput" class="form-input" style="flex:1" placeholder="自定义兴趣...">
+        <button id="editAddCustomInterestBtn" class="icon-btn" style="padding:0 16px;">添加</button>
+      </div>
+    </div>
+    <button id="saveProfileBtn" class="btn primary">保存修改</button>
+  </div>
+</div>
 
-<div id="chat" class="modal h"><div class="box" style="height:420px">
-<div class="row"><b id="cn"></b><button class="btn g" style="width:auto;padding:6px 12px" onclick="closeChat()">✕</button><button class="btn g" style="width:auto;padding:6px 12px" onclick="cam()">📹</button></div><video id="lv" autoplay muted playsinline style="display:none;width:100%;max-height:120px;border-radius:12px;background:#000"></video>
-<div id="cm" style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px"></div>
-<div class="row"><input id="ci" placeholder="发消息…" onkeydown="if(event.key==='Enter')sendC()"><button class="btn" style="width:70px" onclick="sendC()">发送</button></div></div></div>
+<!-- ================= APP ================= -->
+<div id="app">
+  <div class="top-nav" id="topNav"></div>
 
-<div id="top" class="tabs"></div>
-<main class="wrap" id="main"></main>
-<button class="fab" id="fab" onclick="fabClick()">▶<br>专注</button>
-<nav id="nav"></nav>
+  <!-- 学习 -->
+  <div id="tab-study" class="content-area active">
+    <div id="sub-kanban" class="sub-content active">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" id="dashDate">今天</span>
+          <span class="badge badge-orange" id="dashTotal">总计 0 分钟</span>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut" id="donut"><div class="donut-inner"><div class="donut-value" id="donutVal">0h</div><div class="donut-label">专注</div></div></div>
+          <div class="legend" id="legend"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">日习惯打卡</span>
+          <span class="badge badge-blue" id="habitCount">0/0</span>
+        </div>
+        <div id="dashHabits"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">今日计划</span>
+          <span class="badge badge-orange">搭友可见</span>
+        </div>
+        <div id="dashPlan"></div>
+      </div>
+    </div>
 
-<script>
-const $=id=>document.getElementById(id);
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const K='studybuddy_v1';
-let S={user:null,logs:[],habits:[{n:'早起',c:'起床',done:{}},{n:'散步',c:'晚上',done:{}}],okrs:[],plans:{},posts:[
-{id:1,a:'岁晏',t:'今天把睡眠状态调整过来了，太不容易了 🥲',likes:3,liked:false,d:'示例'}],chats:{},following:{}};
-try{const r=localStorage.getItem(K);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
-const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
-const PEERS=[{n:'岁晏',f:'教资',r:'96%'},{n:'Alex',f:'数学与物理',r:'91%'},{n:'Chloe',f:'写作',r:'88%'},{n:'Ethan',f:'Python',r:'85%'}];
-const REPLY=['加油！一起冲 💪','我也在学，等会儿打卡～','今天番茄钟完成几个了？','休息一下喝口水吧'];
-const today=()=>new Date().toISOString().slice(0,10);
-const fmt=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}时${m}分`:`${m}分`};
-let main='study',sub='看板',selDate=today();
+    <div id="sub-plan" class="sub-content">
+      <div class="utility-between">
+        <span style="font-size:16px;font-weight:800">我的日计划</span>
+        <button class="icon-btn" id="openPlanBtn">+ 新建计划</button>
+      </div>
+      <div id="planList" class="plan-list"></div>
+      <div class="empty-state" id="planEmpty"><i class="fa-solid fa-calendar-plus"></i><p>暂无计划，点上方创建</p></div>
+    </div>
 
+    <div id="sub-okr" class="sub-content">
+      <div class="utility-between">
+        <span style="font-size:16px;font-weight:800">阶段目标 OKR</span>
+        <button class="icon-btn" id="openOkrBtn">+ 新建目标</button>
+      </div>
+      <div id="okrList"></div>
+      <div class="empty-state" id="okrEmpty"><i class="fa-solid fa-bullseye"></i><p>暂无目标</p></div>
+    </div>
 
-function render(){
- if(S.user)$('auth').classList.add('h');
- const subs=['看板','日计划','目标','小习惯'];
- $('top').innerHTML=main==='study'?subs.map(s=>`<button class="${s===sub?'on':''}" onclick="sub='${s}';render()">${s}</button>`).join(''):
- `<button class="on">${{social:'搭友',square:'发现',me:'我的'}[main]}</button>`;
- $('nav').innerHTML=[['study','📚','学习'],['social','👥','搭友'],['square','🧭','发现'],['me','👤','我的']]
- .map(([k,i,t])=>`<button class="${k===main?'on':''}" onclick="main='${k}';render()"><span>${i}</span>${t}</button>`).join('');
- $('fab').innerHTML=main==='me'?'✎<br>记录想法':'▶<br>专注';
- $('main').innerHTML=({study:vStudy,social:vSocial,square:vSquare,me:vMe})[main]();
+    <div id="sub-habit" class="sub-content">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">小习惯管理</span>
+          <span class="badge badge-orange" id="habitStreak">连续 0 天</span>
+        </div>
+        <div id="habitList"></div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <input id="newHabit" type="text" class="form-input" style="flex:1" placeholder="新习惯名称">
+          <button id="addHabitBtn" class="icon-btn" style="padding:0 16px">添加</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 搭友 -->
+  <div id="tab-buddy" class="content-area">
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">我的搭友</span>
+        <span style="font-size:12px;color:var(--sub)">AI 智能匹配</span>
+      </div>
+      <div id="buddyList"></div>
+      <div class="empty-state" id="buddyEmpty"><i class="fa-solid fa-user-group"></i><p>暂无搭友，去发现页寻找吧</p></div>
+    </div>
+  </div>
+
+  <!-- 发现 -->
+  <div id="tab-discover" class="content-area">
+    <div id="disc-findbuddy" class="disc-tab">
+      <div class="utility-between" style="margin-bottom:12px">
+        <span style="font-size:16px;font-weight:800">找搭子</span>
+        <button class="icon-btn" id="aiMatchBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> AI 匹配</button>
+      </div>
+      <div id="matchList"></div>
+    </div>
+    <div id="disc-groups" class="disc-tab hidden">
+      <div class="utility-between" style="margin-bottom:12px">
+        <span style="font-size:16px;font-weight:800">找小组</span>
+        <button class="icon-btn" id="openRoomBtn">+ 创建自习室</button>
+      </div>
+      <div id="roomList"></div>
+    </div>
+    <div id="disc-following" class="disc-tab hidden">
+      <div class="utility-between" style="margin-bottom:12px">
+        <span style="font-size:16px;font-weight:800">我的关注</span>
+      </div>
+      <div id="followList"></div>
+    </div>
+    <div id="disc-plaza" class="disc-tab hidden">
+      <div class="utility-between" style="margin-bottom:12px">
+        <span style="font-size:16px;font-weight:800">操场</span>
+        <button class="icon-btn" id="openPostBtn">+ 发动态</button>
+      </div>
+      <div id="feedList"></div>
+    </div>
+    <div id="disc-nearby" class="disc-tab hidden">
+      <div class="utility-between" style="margin-bottom:12px">
+        <span style="font-size:16px;font-weight:800">同城</span>
+        <span class="badge badge-orange" id="cityLabel">-</span>
+      </div>
+      <div id="nearbyList"></div>
+    </div>
+  </div>
+
+  <!-- 我的 -->
+  <div id="tab-profile" class="content-area">
+    <div class="profile-hero">
+      <button class="profile-edit-btn" id="editProfileBtn"><i class="fa-solid fa-pen"></i> 编辑</button>
+      <div class="profile-avatar-lg" id="profileAvatar">U</div>
+      <div class="profile-name" id="profileName">用户</div>
+      <div class="profile-email" id="profileEmail">email</div>
+      <span class="badge badge-admin hidden" id="adminBadge" style="margin-top:8px">Admin</span>
+    </div>
+    <div class="profile-stats">
+      <div><div class="stat-v" id="stFollow">0</div><div class="stat-l">关注</div></div>
+      <div><div class="stat-v" id="stFans">0</div><div class="stat-l">粉丝</div></div>
+      <div><div class="stat-v" id="stViews">0</div><div class="stat-l">看过我</div></div>
+      <div><div class="stat-v" id="stLikes">0</div><div class="stat-l">获赞</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">我的笔记</span>
+        <button class="icon-btn" id="openPostBtn2">+ 发布</button>
+      </div>
+      <div class="xhs-grid" id="myPostsGrid"></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="utility-between" style="cursor:pointer"><span><i class="fa-solid fa-crown" style="color:var(--primary);margin-right:8px"></i>会员中心</span><span style="color:var(--light);font-size:12px">开通特权 ></span></div>
+        <div class="utility-between" style="cursor:pointer"><span><i class="fa-solid fa-gear" style="margin-right:8px"></i>设置</span><span style="color:var(--light);font-size:12px">></span></div>
+        <div class="utility-between" style="cursor:pointer"><span><i class="fa-solid fa-circle-info" style="margin-right:8px"></i>关于</span><span style="color:var(--light);font-size:12px">v2.1</span></div>
+      </div>
+    </div>
+    <button id="signOutBtn" class="btn ghost" style="color:var(--danger);border-color:var(--danger)">退出登录</button>
+  </div>
+
+  <button class="fab" id="fabBtn"><i class="fa-solid fa-play"></i><span>专注</span></button>
+
+  <div class="bottom-nav">
+    <div class="nav-item active" data-tab="study"><i class="fa-solid fa-graduation-cap"></i><span>学习</span></div>
+    <div class="nav-item" data-tab="buddy"><i class="fa-solid fa-user-group"></i><span>搭友</span></div>
+    <div class="nav-item" data-tab="discover"><i class="fa-solid fa-compass"></i><span>发现</span></div>
+    <div class="nav-item" data-tab="profile"><i class="fa-solid fa-user"></i><span>我的</span></div>
+  </div>
+</div>
+
+<!-- ================= MODALS ================= -->
+<!-- OKR -->
+<div class="modal" id="okrModal">
+  <div class="modal-content">
+    <div class="modal-head"><h3>新建阶段目标</h3><button class="close-btn" data-close="okrModal"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="form-group"><label>目标标题</label><input id="okrTitle" type="text" class="form-input" placeholder="例如：通过教资考试"></div>
+    <div class="form-group"><label>截止日期</label><input id="okrDate" type="date" class="form-input"></div>
+    <button id="saveOkrBtn" class="btn primary">保存</button>
+  </div>
+</div>
+
+<!-- Plan -->
+<div class="modal" id="planModal">
+  <div class="modal-content">
+    <div class="modal-head"><h3>新建日计划</h3><button class="close-btn" data-close="planModal"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="form-group"><label>计划内容</label><textarea id="planContent" class="form-input" placeholder="今天要完成什么..."></textarea></div>
+    <div class="form-group"><label>完成证明（图片）</label>
+      <div class="upload-btn"><i class="fa-solid fa-cloud-arrow-up"></i> 点击上传 <input type="file" id="planImg" accept="image/*"></div>
+      <img id="planPreview" class="img-preview">
+    </div>
+    <button id="savePlanBtn" class="btn primary">提交计划</button>
+  </div>
+</div>
+
+<!-- Post -->
+<div class="modal" id="postModal">
+  <div class="modal-content">
+    <div class="modal-head"><h3>发布动态</h3><button class="close-btn" data-close="postModal"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="form-group"><label>内容</label><textarea id="postContent" class="form-input" placeholder="分享你的学习心得..."></textarea></div>
+    <div class="form-group"><label>配图（可选）</label>
+      <div class="upload-btn"><i class="fa-solid fa-image"></i> 选择图片 <input type="file" id="postImg" accept="image/*"></div>
+      <img id="postPreview" class="img-preview">
+    </div>
+    <button id="savePostBtn" class="btn primary">发布</button>
+  </div>
+</div>
+
+<!-- Chat -->
+<div class="modal" id="chatModal">
+  <div class="modal-content">
+    <div class="chat-head">
+      <div class="utility-flex">
+        <div class="feed-avatar" id="chatAvatar">U</div>
+        <div>
+          <div style="font-weight:700;font-size:14px" id="chatName">用户</div>
+          <div style="font-size:11px;color:var(--success)">● 在线</div>
+        </div>
+      </div>
+      <div class="utility-flex">
+        <button class="chat-btn attach" id="startCallBtn"><i class="fa-solid fa-phone"></i></button>
+        <button class="close-btn" data-close="chatModal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="chat-input">
+      <button class="chat-btn attach" id="chatAttachBtn"><i class="fa-solid fa-paperclip"></i></button>
+      <input type="file" id="chatFile" style="display:none" accept="image/*,.pdf,.doc,.docx,.txt">
+      <input id="chatText" type="text" placeholder="发送消息...">
+      <button class="chat-btn send" id="chatSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Call -->
+<div class="modal" id="callModal">
+  <div class="modal-content">
+    <div class="video-stage">
+      <video class="remote" id="remoteVideo" autoplay playsinline></video>
+      <video class="local" id="localVideo" autoplay muted playsinline></video>
+      <div class="call-info"><h3 id="callName">用户</h3><p id="callStatus">正在连接...</p></div>
+      <div class="call-ctrl">
+        <button class="call-btn" id="muteBtn"><i class="fa-solid fa-microphone"></i></button>
+        <button class="call-btn" id="videoBtn"><i class="fa-solid fa-video"></i></button>
+        <button class="call-btn" id="screenBtn"><i class="fa-solid fa-desktop"></i></button>
+        <button class="call-btn danger" id="endCallBtn"><i class="fa-solid fa-phone-slash"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Study Room -->
+<div class="modal" id="roomModal">
+  <div class="modal-content">
+    <div class="chat-head" style="background:#1a1a1a;border-bottom:1px solid #333">
+      <div>
+        <div style="font-weight:700;font-size:15px;color:#fff" id="roomTitle">自习室</div>
+        <div style="font-size:11px;color:#aaa" id="roomMeta">0 人在线</div>
+      </div>
+      <div class="utility-flex">
+        <button class="chat-btn attach" id="roomMusicBtn" title="音乐"><i class="fa-solid fa-music"></i></button>
+        <button class="chat-btn attach" id="roomAlarmBtn" title="闹钟"><i class="fa-solid fa-bell"></i></button>
+        <button class="close-btn" data-close="roomModal" style="background:#333;color:#fff"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:14px;background:#0d0d0d" id="roomMembers"></div>
+    <div class="chat-input" style="background:#1a1a1a;border-top:1px solid #333">
+      <input id="roomMsg" type="text" placeholder="发言..." style="background:#222;color:#fff;border-color:#333">
+      <button class="chat-btn send" id="roomSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+    <div style="padding:12px;background:#1a1a1a;display:flex;gap:8px;justify-content:center">
+      <button class="call-btn" id="roomMuteBtn" title="麦克风"><i class="fa-solid fa-microphone"></i></button>
+      <button class="call-btn" id="roomVideoBtn" title="摄像头"><i class="fa-solid fa-video"></i></button>
+      <button class="call-btn" id="roomScreenBtn" title="共享屏幕"><i class="fa-solid fa-desktop"></i></button>
+      <button class="call-btn" id="roomHostBtn" title="主持控制" style="display:none"><i class="fa-solid fa-user-shield"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- Timer -->
+<div class="modal" id="timerModal">
+  <div class="modal-content" style="text-align:center">
+    <div class="modal-head"><h3>专注自习</h3><button class="close-btn" data-close="timerModal"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="timer-display" id="timerDisplay">25:00</div>
+    <div class="music-selector" id="musicSelector">
+      <span class="music-chip selected" data-m="off">关闭</span>
+      <span class="music-chip" data-m="rain">🌧 雨声</span>
+      <span class="music-chip" data-m="brown">🟤 棕噪音</span>
+      <span class="music-chip" data-m="waves">🌊 海浪</span>
+      <span class="music-chip" data-m="forest">🌲 森林</span>
+    </div>
+    <div class="timer-controls">
+      <button class="timer-btn" id="timerStop" style="background:#fff2f0;color:var(--danger)"><i class="fa-solid fa-stop"></i></button>
+      <button class="timer-btn" id="timerPlay" style="background:var(--primary);color:#fff"><i class="fa-solid fa-play"></i></button>
+      <button class="timer-btn hidden" id="timerPause" style="background:#f0f0f0;color:var(--text)"><i class="fa-solid fa-pause"></i></button>
+    </div>
+    <div class="form-group" style="text-align:left">
+      <label>标签（用于分类统计）</label>
+      <input id="timerTag" type="text" class="form-input" placeholder="例如：管理学 / 英语">
+    </div>
+    <button id="timerFinishBtn" class="btn primary" style="background:var(--danger)">结束并打卡</button>
+  </div>
+</div>
+
+<!-- Create Room -->
+<div class="modal" id="createRoomModal">
+  <div class="modal-content">
+    <div class="modal-head"><h3>创建自习室</h3><button class="close-btn" data-close="createRoomModal"><i class="fa-solid fa-xmark"></i></button></div>
+    <div class="form-group"><label>房间名</label><input id="roomName" type="text" class="form-input" placeholder="例如：晚间专注局"></div>
+    <div class="form-group"><label>隐私</label>
+      <select id="roomPrivacy" class="form-input">
+        <option value="public">公开（所有人可加入）</option>
+        <option value="private">私密（仅邀请搭友）</option>
+      </select>
+    </div>
+    <div class="form-group"><label>专注时长（分钟）</label><input id="roomDuration" type="number" class="form-input" value="25"></div>
+    <button id="createRoomBtn" class="btn primary">创建</button>
+  </div>
+</div>
+
+<div id="toast-wrap"></div>
+
+<script type="module">
+/* ============================================================
+   1. FIREBASE
+============================================================ */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+import {
+  getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
+  signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, getDocs, query, orderBy, limit,
+  where, doc, setDoc, getDoc, updateDoc, deleteDoc, serverTimestamp,
+  onSnapshot, arrayUnion, arrayRemove, increment
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAhwQg1SnRh2CiOxdeyHMKYBfKcUzwJse8",
+  authDomain: "study-buddy-381ae.firebaseapp.com",
+  projectId: "study-buddy-381ae",
+  storageBucket: "study-buddy-381ae.firebasestorage.app",
+  messagingSenderId: "571015444052",
+  appId: "1:571015444052:web:fda4d3ae796961efeddfc1",
+  measurementId: "G-F9D8WM40P7"
+};
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider();
+
+// AI key
+const AI_KEY = "sk-2b91a445dd74400880c76ec34d7e7c03";
+const AI_ENDPOINT = "https://api.deepseek.com/v1/chat/completions";
+
+/* ============================================================
+   2. STATE
+============================================================ */
+let currentUser = null;
+let userProfile = null;
+let currentPlanImg = null;
+let currentPostImg = null;
+let currentChatFile = null;
+let currentChatFileName = null;
+let currentChatPeer = null;
+let peerUnsub = null;
+let activeRoomUnsub = null;
+let activeRoomId = null;
+let myRoomRole = null;
+let localStream = null;
+let screenStream = null;
+let timerInterval = null;
+let timerSeconds = 25 * 60;
+let timerRunning = false;
+let currentMusic = 'off';
+let musicAudio = null;
+
+const PRESET_INTERESTS = ['考研','雅思','托福','教资','CPA','法考','编程','数学','英语','管理学','经济学','早起','阅读','冥想'];
+
+/* ============================================================
+   3. HELPERS & LOCATION NORMALIZATION
+============================================================ */
+const $ = (id) => document.getElementById(id);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+function toast(msg, type = 'info') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  $('toast-wrap').appendChild(t);
+  setTimeout(() => t.remove(), 3000);
 }
 
-function vStudy(){
- if(sub==='看板'){
-  const tot=S.logs.reduce((a,l)=>a+l.s,0);
-  const days=[...Array(mon?30:7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return d});
-  const dayLogs=S.logs.filter(l=>l.d===selDate);const dt=dayLogs.reduce((a,l)=>a+l.s,0);
-  const by={};dayLogs.forEach(l=>by[l.sub]=(by[l.sub]||0)+l.s);
-  const wk=days.map(d=>S.logs.filter(l=>l.d===d.toISOString().slice(0,10)).reduce((a,l)=>a+l.s,0));const mx=Math.max(...wk,1);
-  return `<div class="card"><div class="row"><span>总计专注 <b>${fmt(tot)||'0分'}</b></span><span>记录 <b>${S.logs.length}</b> 次</span></div></div>
-  <div class="dates">${days.map(d=>{const k=d.toISOString().slice(0,10);return `<div class="d ${k===selDate?'on':''}" onclick="selDate='${k}';render()"><span>${'日一二三四五六'[d.getDay()]}</span><b>${d.getDate()}</b></div>`}).join('')}</div>
-  <div class="card"><b>日活动：${fmt(dt)||'0分'}</b>${Object.keys(by).map(k=>`<div class="row sub"><span>${esc(k)}</span><b style="color:var(--tx)">${fmt(by[k])}</b></div>`).join('')||'<div class="sub">当天还没有专注记录，点右下角“专注”开始</div>'}</div>
-  <div class="card"><div class="row"><b>${mon?'月':'周'}统计</b><button class="tag" onclick="mon=!mon;render()">切换${mon?'周':'月'}报</button></div><div style="display:flex;align-items:flex-end;gap:8px;height:90px">${wk.map((v,i)=>`<div style="flex:1;text-align:center;font-size:10px;color:var(--sub)"><div style="height:${Math.max(v/mx*70,3)}px;background:var(--or);border-radius:6px 6px 0 0"></div>${days[i].getDate()}</div>`).join('')}</div></div>`+extra()}
- if(sub==='日计划'){
-  const p=S.plans[selDate]||[];
-  return `<div class="card"><div class="row"><b>${selDate} 计划</b><span class="tag" onclick="openForm('plan')">+ 添加</span></div>
-  ${p.map((x,i)=>`<div class="row"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto" ${x.ok?'checked':''} onchange="togglePlan(${i})"><span style="${x.ok?'text-decoration:line-through;color:var(--sub)':''}">${esc(x.t)}</span></label><button class="tag" onclick="delPlan(${i})">删</button></div>`).join('')||'<div class="sub">还没有计划</div>'}
-  ${proofHtml()}<div class="sub">完成 ${p.filter(x=>x.ok).length}/${p.length}</div></div>`}
- if(sub==='目标')return `<div class="row"><span class="sub">长效目标</span><span class="tag" onclick="openForm('okr')">+ 新建目标</span></div>`+
-  (S.okrs.map((o,i)=>{const left=o.date?Math.ceil((new Date(o.date)-new Date())/864e5):null;
-  return `<div class="card"><div class="row"><span class="sub">${o.date?`📅 ${o.date} 还剩 ${left} 天`:'无截止日期'}</span><button class="tag" onclick="delOkr(${i})">删</button></div><b>${esc(o.t)}</b><div class="bar"><i style="width:${o.p}%"></i></div><div class="row"><span class="sub">${o.p}%</span><div><button class="tag" onclick="okrStep(${i},-10)">−10</button> <button class="tag" onclick="okrStep(${i},10)">+10</button></div></div></div>`}).join('')||'<div class="card sub">还没有目标，点右上角新建</div>');
- const t=today();
- return `<div class="row"><span class="sub">每日小习惯</span><span class="tag" onclick="openForm('habit')">+ 新增</span></div><div class="card">`+
-  S.habits.map((h,i)=>{const d=!!h.done[t];const st=Object.keys(h.done).length;return `<div class="row"><span>${esc(h.n)} <span class="sub">${esc(h.c)} · 累计${st}天</span></span><button class="tag" style="${d?'background:#f6ffed;color:var(--ok);border-color:#b7eb8f':''}" onclick="checkHabit(${i})">${d?'已完成 ✓':'打卡'}</button></div>`}).join('')+`</div>`;
+function fmtDate(d) {
+  const x = new Date(d);
+  return `${x.getFullYear()}.${String(x.getMonth()+1).padStart(2,'0')}.${String(x.getDate()).padStart(2,'0')}`;
 }
-function vSocial(){return PEERS.map((p,i)=>`<div class="card"><div class="row"><div class="row" style="justify-content:flex-start;gap:12px"><div class="av">${p.n[0]}</div><div><b>${p.n}</b><div class="sub" style="color:var(--or)">正在专注「${p.f}」</div><span class="tag">契合度 ${p.r}</span></div></div>
- <div><button class="tag" onclick="follow('${p.n}')">${S.following[p.n]?'已关注':'关注'}</button> <button class="tag" onclick="openChat('${p.n}')">私聊</button></div></div></div>`).join('')}
-function vSquare(){return `<div class="row"><b>广场动态</b><span class="tag" onclick="openForm('post')">+ 发动态</span></div>`+
- S.posts.map((p,i)=>`<div class="card"><div class="row"><b>${esc(p.a)}</b><span class="sub">${p.d}</span></div><div style="background:#fff8f0;color:#333;padding:12px;border-radius:14px;font-size:13px">${esc(p.t)}</div>
- <div class="row sub"><button class="tag" onclick="like(${i})">${p.liked?'❤️':'👍'} ${p.likes}</button>${p.mine?`<button class="tag" onclick="delPost(${i})">删除</button>`:''}</div></div>`).join('')}
-let tcat='全部';
-const CATS=[['搭友分享','搭友圈'],['向全世界叽叽喳喳','公开'],['待办','搭友圈'],['碎碎念','私密'],['树洞','私密']];
-function dl(ts){const d=new Date(ts),n=new Date(new Date().toDateString()),k=Math.round((n-new Date(d.toDateString()))/864e5);
- return `${k===0?'今天':k===1?'昨天':k===2?'前天':'周'+'日一二三四五六'[d.getDay()]}<small>${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}</small>`}
-function vMe(){const u=S.user;if(!u)return '';
- const th=Object.entries(THOUGHTS).map(([k,v])=>({k,...v})).sort((a,b)=>b.ts-a.ts);
- const list=tcat==='全部'?th:th.filter(x=>x.cat===tcat);const tags=PROF.tags||[];
- const hd=`<div class="hero"><div class="row"><span></span><button class="chip" onclick="openForm('name')">✎ 昵称</button></div>
- <div class="row" style="justify-content:flex-start;gap:12px"><div style="background:#fff;border-radius:16px;padding:8px 12px;font-size:30px;transform:rotate(-2deg)">🐱🐰🐻</div><div><b style="font-size:18px">${esc(u.name)}</b><div><span class="chip">1.初级学员</span></div></div></div>
- <div class="st"><div><b>${Object.keys(S.following).length}</b>关注</div><div><b>${th.length}</b>想法</div><div><b>${S.logs.length}</b>专注</div><div><b>${S.habits.reduce((a,h)=>a+Object.keys(h.done).length,0)}</b>打卡</div><div><b>${S.posts.filter(p=>p.mine).reduce((a,p)=>a+p.likes,0)}</b>我的赞</div></div>
- <div style="font-size:13px;cursor:pointer" onclick="openForm('quote')">❝ ${esc(PROF.quote||'想，全是问题；做，都是答案（点击修改）')}</div>
- <div style="display:flex;gap:8px;flex-wrap:wrap">${tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}<button class="chip" onclick="openForm('tag')">+ 标签</button></div></div>
- <div class="vip"><b>👑 会员中心</b><span style="font-size:12px">开通即享连线等多重特权 ›</span></div>`;
- const cats=`<div class="cats"><button class="${tcat==='全部'?'on':''}" onclick="tcat='全部';render()">全部<small>${th.length}个想法</small></button>`+CATS.map(c=>`<button class="${tcat===c[0]?'on':''}" onclick="tcat='${c[0]}';render()">${c[0]}<small>${c[1]}</small></button>`).join('')+'</div>';
- const items=`<div class="bub">今天发生了什么新鲜事？</div>`+list.map(x=>`<div class="tl"><div class="dt">${dl(x.ts)}</div><div class="card" style="flex:1"><div class="sub" style="text-align:right">${esc(x.cat)}（${(CATS.find(c=>c[0]===x.cat)||[,''])[1]}）</div><div style="font-size:14px;white-space:pre-wrap">${esc(x.t)}</div><div class="row sub"><span>${new Date(x.ts).toTimeString().slice(0,5)}</span><button class="tag" onclick="delThought('${x.k}')">删除</button></div></div></div>`).join('');
- let adm='';
- if(isAdmin){adm=`<div class="card"><b>🛡 管理员 · 用户管理</b>`+Object.entries(USERS).map(([id,x])=>{const b=!!BANS[id],me=id===u.uid;return `<div class="row"><div style="min-width:0"><div>${esc(x.name||'?')} <span class="sub">${esc(x.email||'')}</span></div><div class="sub">最近：${x.lastSeen?new Date(x.lastSeen).toLocaleString():'-'}</div></div>${me?'<span class="tag">我</span>':`<button class="tag" style="${b?'':'background:#fff2f0;color:var(--bad);border-color:#ffccc7'}" onclick="kick('${id}',${b})">${b?'解封':'踢出'}</button>`}</div>`}).join('')+`</div>`}
- return hd+cats+items+adm+`<button class="btn g" onclick="logout()">退出登录</button>`}
-function delThought(k){if(confirm('删除这条想法？'))db.ref('thoughts/'+S.user.uid+'/'+k).remove()}
-function kick(id,b){if(!confirm(b?'解封该用户？':'踢出该用户？对方会被立即登出且无法再登录'))return;(b?db.ref('banned/'+id).remove():db.ref('banned/'+id).set({by:S.user.email,at:Date.now()})).catch(e=>alert('失败：'+e.message))}
-function fabClick(){main==='me'?openForm('thought'):startT()}
+function fmtTs(ts) {
+  if (!ts) return '刚刚';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const m = Math.floor((Date.now() - d) / 60000);
+  if (m < 1) return '刚刚';
+  if (m < 60) return `${m}分钟前`;
+  if (m < 1440) return `${Math.floor(m/60)}小时前`;
+  return fmtDate(d);
+}
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
 
-/* forms */
-let fm=null;
-function openForm(t){fm=t;const m={plan:['添加计划','计划内容'],okr:['新建目标 (OKR)','核心目标'],habit:['新增习惯','习惯名称'],post:['发布动态','今天有什么心得？'],thought:['记录想法','今天发生了什么新鲜事？'],name:['修改昵称','昵称'],quote:['修改签名','想，全是问题；做，都是答案'],tag:['添加标签','如：大学']}[t];
- $('ft').textContent=m[0];$('f1').placeholder=m[1];$('f1').value=t==='name'?S.user.name:t==='quote'?(PROF.quote||''):'';$('f2').value='';$('f2').style.display=t==='okr'?'block':'none';$('f3').style.display=t==='thought'?'block':'none';$('form').classList.remove('h');setTimeout(()=>$('f1').focus(),50)}
-function submitForm(){const v=$('f1').value.trim();if(!v)return;
- if(['thought','name','quote','tag'].includes(fm)){const uid=S.user.uid,ur=db.ref('users/'+uid);let p;
-  if(fm==='thought')p=db.ref('thoughts/'+uid).push({t:v,cat:$('f3').value,ts:Date.now()});
-  if(fm==='name'){S.user.name=v;ME.updateProfile({displayName:v});p=ur.update({name:v})}
-  if(fm==='quote')p=ur.update({quote:v});
-  if(fm==='tag')p=ur.update({tags:[...(PROF.tags||[]),v].slice(0,6)});
-  p.catch(e=>alert('保存失败：'+e.message));$('form').classList.add('h');return}
- if(fm==='plan'){(S.plans[selDate]=S.plans[selDate]||[]).push({t:v,ok:false})}
- if(fm==='okr')S.okrs.push({t:v,date:$('f2').value,p:0});
- if(fm==='habit')S.habits.push({n:v,c:'自定义',done:{}});
- if(fm==='post')S.posts.unshift({id:Date.now(),a:S.user?.name||'我',t:v,likes:0,liked:false,d:'刚刚',mine:true});
- save();$('form').classList.add('h');render()}
-function togglePlan(i){S.plans[selDate][i].ok^=1;save();render()}
-function delPlan(i){S.plans[selDate].splice(i,1);save();render()}
-function delOkr(i){S.okrs.splice(i,1);save();render()}
-function okrStep(i,d){S.okrs[i].p=Math.max(0,Math.min(100,S.okrs[i].p+d));save();render()}
-function checkHabit(i){const h=S.habits[i],t=today();h.done[t]?delete h.done[t]:h.done[t]=1;save();render()}
-function like(i){const p=S.posts[i];p.liked=!p.liked;p.likes+=p.liked?1:-1;save();render()}
-function delPost(i){S.posts.splice(i,1);save();render()}
-function follow(n){S.following[n]?delete S.following[n]:S.following[n]=1;save();render()}
+/**
+ * 智能城市标准化：将 KL / 吉隆坡 / 级龙破 / kuala lumpur 统一为 kuala lumpur
+ * 这样即使打错字或输入缩写，也能匹配到同城的人！
+ */
+function normalizeCity(city) {
+  if (!city) return '未设置';
+  const c = city.toLowerCase().trim().replace(/\s+/g, '');
+  
+  // 吉隆坡及其变体/错字
+  if (c.includes('kl') || c.includes('吉隆坡') || c.includes('kuala') || c.includes('级龙破') || c.includes('吉龙坡')) {
+    return 'kuala lumpur';
+  }
+  // 新加坡及其变体
+  if (c.includes('sg') || c.includes('新加坡') || c.includes('singapore')) {
+    return 'singapore';
+  }
+  // 北京及其变体
+  if (c.includes('bj') || c.includes('北京') || c.includes('beijing')) {
+    return 'beijing';
+  }
+  // 上海及其变体
+  if (c.includes('sh') || c.includes('上海') || c.includes('shanghai')) {
+    return 'shanghai';
+  }
+  // 如果用户输入了奇怪的内容，原样返回小写，让用户自己去修改
+  return c;
+}
 
-/* chat */
-let cw=null;
-function openChat(n){cw=n;$('cn').textContent=n;drawC();$('chat').classList.remove('h')}
-function drawC(){const m=S.chats[cw]||[];$('cm').innerHTML=m.map(x=>`<div class="msg ${x.me?'me':''}">${esc(x.t)}</div>`).join('')||'<div class="sub">打个招呼吧 👋</div>';$('cm').scrollTop=1e6}
-function sendC(){const v=$('ci').value.trim();if(!v)return;(S.chats[cw]=S.chats[cw]||[]).push({me:1,t:v});$('ci').value='';save();drawC();
- const who=cw;setTimeout(()=>{(S.chats[who]=S.chats[who]||[]).push({t:REPLY[Math.floor(Math.random()*REPLY.length)]});save();if(cw===who)drawC()},900)}
+function openModal(id){ $(id).classList.add('active'); document.body.style.overflow='hidden'; }
+function closeModal(id){ $(id).classList.remove('active'); document.body.style.overflow=''; }
 
-/* timer */
-let T={left:1500,total:1500,id:null,run:false,start:0};
-function paintT(){$('clk').textContent=String(Math.floor(T.left/60)).padStart(2,'0')+':'+String(T.left%60).padStart(2,'0')}
-function tick(){T.left--;paintT();if(T.left<=0){endT(true)}}
-function startT(){if(!S.user)return;$('timer').classList.remove('h');if(!T.run&&T.left===T.total&&!T.id){runT()}}
-function runT(){clearInterval(T.id);T.run=true;$('pz').textContent='暂停';T.id=setInterval(tick,1000)}
-function pauseT(){if(T.run){clearInterval(T.id);T.run=false;$('pz').textContent='继续'}else runT()}
-function setMin(){const m=parseInt(prompt('专注分钟数（1-180）',T.total/60),10);if(m>0&&m<=180){T.total=T.left=m*60;paintT()}}
-function resetT(){if(NS)noise();clearInterval(T.id);T.id=null;T.run=false;T.left=T.total;paintT();$('timer').classList.add('h')}
-function cancelT(){if(T.left===T.total||confirm('放弃本次专注？不会记录'))resetT()}
-function endT(done){const s=T.total-T.left;clearInterval(T.id);
- if(s>=10){S.logs.push({d:today(),s,sub:$('subj').value.trim()||'未命名',at:Date.now()});save()}
- if(done)alert('🎉 完成一个专注周期！');resetT();render()}
-paintT();S.user=null;render();
+$$('.close-btn').forEach(b => b.addEventListener('click', () => {
+  closeModal(b.dataset.close);
+  if (b.dataset.close === 'roomModal' && activeRoomId) leaveRoom();
+  if (b.dataset.close === 'callModal') endCall();
+}));
+$$('.modal').forEach(m => m.addEventListener('click', e => {
+  if (e.target === m && m.id !== 'callModal' && m.id !== 'roomModal') {
+    closeModal(m.id);
+  }
+}));
 
-/* ===== extras ===== */
-let mon=false,NC=null,NS=null,CS=null;
-function noise(){const b=$('nz');if(NS){NS.stop();NS=null;b.textContent='🎵 白噪音：关';return}
- NC=NC||new(window.AudioContext||window.webkitAudioContext)();const n=NC.sampleRate*2,buf=NC.createBuffer(1,n,NC.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
- NS=NC.createBufferSource();NS.buffer=buf;NS.loop=true;const g=NC.createGain();g.gain.value=.15;NS.connect(g);g.connect(NC.destination);NS.start();b.textContent='🎵 白噪音：开'}
-function extra(){const t=new Date(),y=t.getFullYear(),m=t.getMonth(),dn=new Date(y,m+1,0).getDate();
- const done=new Set();S.habits.forEach(h=>Object.keys(h.done).forEach(k=>done.add(k)));
- const cells=[...Array(dn)].map((_,i)=>{const k=`${y}-${String(m+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;return `<div style="aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;border:1px solid var(--bd);${done.has(k)?'background:#fff3e0;color:var(--or);':''}${i+1===t.getDate()?'outline:2px solid var(--or)':''}">${i+1}</div>`}).join('');
- const okr=S.okrs.length?Math.round(S.okrs.reduce((a,o)=>a+o.p,0)/S.okrs.length):0,tot=S.logs.reduce((a,l)=>a+l.s,0);
- const B=[['⚡','专注达人',S.logs.length>=5],['🔥','打卡7天',done.size>=7],['👥','社交先锋',Object.keys(S.following).length>=3],['🎯','目标达人',okr>=80]];
- return `<div class="card"><b>📅 ${m+1}月习惯坚持</b><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">${cells}</div></div>
-<div class="card"><b>📊 学习指标</b><div class="row sub"><span>OKR 平均达成率</span><b style="color:var(--tx)">${okr}%</b></div><div class="bar"><i style="width:${okr}%"></i></div><div class="row sub"><span>累计专注</span><b style="color:var(--tx)">${fmt(tot)||'0分'}</b></div></div>
-<div class="card"><b>🏅 成就勋章</b><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;font-size:11px">${B.map(b=>`<div style="padding:10px 2px;border-radius:14px;border:1px solid var(--bd);${b[2]?'background:#fff3e0;color:var(--or)':'opacity:.45'}"><div style="font-size:22px">${b[2]?b[0]:'🔒'}</div>${b[1]}</div>`).join('')}</div></div>`}
-function proofHtml(){const im=(S.proof||{})[selDate];return `<label class="card" style="border:2px dashed var(--bd);align-items:center;cursor:pointer">${im?`<img src="${im}" style="max-width:100%;border-radius:12px">`:'<span class="sub">☁️ 点击上传完成证明图片</span>'}<input type="file" accept="image/*" hidden onchange="upProof(this)"></label>`}
-function upProof(el){const f=el.files[0];if(!f)return;if(f.size>10*1024*1024)return alert('图片不能超过10MB');
- const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,480/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);
- S.proof=S.proof||{};S.proof[selDate]=c.toDataURL('image/jpeg',.7);save();render()};im.src=r.result};r.readAsDataURL(f)}
-async function cam(){const v=$('lv');if(CS){stopCam();return}
- try{CS=await navigator.mediaDevices.getUserMedia({video:true,audio:true});v.srcObject=CS;v.style.display='block'}catch(e){alert('无法访问摄像头/麦克风，请检查权限')}}
-function stopCam(){if(CS){CS.getTracks().forEach(t=>t.stop());CS=null}const v=$('lv');v.srcObject=null;v.style.display='none'}
-function closeChat(){stopCam();$('chat').classList.add('h')}
+/* ============================================================
+   4. AUTH
+============================================================ */
+$('loginBtn').onclick = async () => {
+  const email = $('authEmail').value.trim(), pwd = $('authPassword').value;
+  if (!email || !pwd) return showAuthErr('请输入邮箱和密码');
+  $('loginBtn').disabled = true; $('loginBtn').innerHTML = '<div class="spinner"></div>';
+  try { await signInWithEmailAndPassword(auth, email, pwd); }
+  catch(e) { showAuthErr('登录失败：' + e.message); }
+  finally { $('loginBtn').disabled = false; $('loginBtn').textContent = '登 录'; }
+};
 
-/* ===== Firebase ===== */
-const CFG={apiKey:'AIzaSyAhwQg1SnRh2CiOxdeyHMKYBfKcUzwJse8',authDomain:'study-buddy-381ae.firebaseapp.com',
- databaseURL:'https://study-buddy-381ae-default-rtdb.firebaseio.com',projectId:'study-buddy-381ae',appId:'1:571015444052:web:fda4d3ae796961efeddfc1'};
-const ADMINS=['yangyang1913@gmail.com'];   // 管理员邮箱（小写），需与数据库规则一致
-firebase.initializeApp(CFG);const auth=firebase.auth(),db=firebase.database();
-let ME=null,PROF={},THOUGHTS={},USERS={},BANS={},isAdmin=false,offs=[];
-const aerr=e=>{$('ae').textContent=e.message||e};
-function gLogin(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(aerr)}
-function emailAuth(reg){const e=$('em').value.trim(),p=$('pw').value;
- (reg?auth.createUserWithEmailAndPassword(e,p).then(c=>c.user.updateProfile({displayName:$('nm').value.trim()||e.split('@')[0]})):auth.signInWithEmailAndPassword(e,p)).catch(aerr)}
-function resetPw(){const e=$('em').value.trim();if(!e)return aerr('请先填写邮箱');auth.sendPasswordResetEmail(e).then(()=>aerr('重置邮件已发送')).catch(aerr)}
-function logout(){auth.signOut()}
-function listen(ref,fn){const h=ref.on('value',x=>{fn(x.val());render()},e=>console.warn(e.message));offs.push(()=>ref.off('value',h))}
-auth.onAuthStateChanged(async u=>{
- offs.forEach(f=>f());offs=[];PROF={};THOUGHTS={};USERS={};BANS={};
- if(!u){S.user=null;ME=null;isAdmin=false;$('auth').classList.remove('h');render();return}
- try{const b=await db.ref('banned/'+u.uid).get();if(b.exists()){await auth.signOut();aerr('该账号已被管理员移出');return}}catch(e){}
- ME=u;isAdmin=ADMINS.includes((u.email||'').toLowerCase());
- S.user={uid:u.uid,email:u.email,name:u.displayName||(u.email||'用户').split('@')[0]};
- $('auth').classList.add('h');
- await db.ref('users/'+u.uid).update({name:S.user.name,email:u.email||'',lastSeen:Date.now()}).catch(()=>{});
- listen(db.ref('users/'+u.uid),v=>PROF=v||{});
- listen(db.ref('thoughts/'+u.uid),v=>THOUGHTS=v||{});
- listen(db.ref('banned/'+u.uid),v=>{if(v){alert('你已被管理员移出');auth.signOut()}});
- if(isAdmin){listen(db.ref('users'),v=>USERS=v||{});listen(db.ref('banned'),v=>BANS=v||{})}
- render()});
-</script></body></html>
+$('signupBtn').onclick = async () => {
+  const email = $('authEmail').value.trim(), pwd = $('authPassword').value;
+  if (!email || !pwd) return showAuthErr('请输入邮箱和密码');
+  if (pwd.length < 6) return showAuthErr('密码至少 6 位');
+  $('signupBtn').disabled = true; $('signupBtn').innerHTML = '<div class="spinner" style="border-color:rgba(255,140,0,.3);border-top-color:var(--primary)"></div>';
+  try { await createUserWithEmailAndPassword(auth, email, pwd); }
+  catch(e) { showAuthErr('注册失败：' + e.message); }
+  finally { $('signupBtn').disabled = false; $('signupBtn').textContent = '注册新账号'; }
+};
+
+$('googleBtn').onclick = async () => {
+  try { await signInWithPopup(auth, googleProvider); }
+  catch(e) { showAuthErr('Google 登录失败：' + e.message); }
+};
+
+function showAuthErr(m) { const e = $('authError'); e.textContent = m; e.style.display = 'block'; }
+
+$('signOutBtn').onclick = async () => { await signOut(auth); toast('已退出登录'); };
+
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    currentUser = user;
+    $('auth').style.display = 'none';
+    const pRef = doc(db, 'users', user.uid);
+    const pSnap = await getDoc(pRef);
+    if (!pSnap.exists() || !pSnap.data().onboarded) {
+      $('onboard').style.display = 'flex';
+      $('app').style.display = 'none';
+      const defaultName = user.displayName || user.email.split('@')[0];
+      $('onName').value = defaultName;
+      renderInterestGrid();
+    } else {
+      userProfile = pSnap.data();
+      $('onboard').style.display = 'none';
+      $('app').style.display = 'flex';
+      initApp();
+    }
+  } else {
+    currentUser = null; userProfile = null;
+    $('auth').style.display = 'flex';
+    $('app').style.display = 'none';
+    $('onboard').style.display = 'none';
+  }
+});
+
+/* ============================================================
+   5. INTEREST MANAGEMENT (Onboarding & Edit Profile)
+============================================================ */
+let selectedInterests = [];
+
+function renderInterestGrid() {
+  const box = $('interestGrid');
+  box.innerHTML = '';
+  PRESET_INTERESTS.forEach(int => {
+    const chip = document.createElement('span');
+    chip.className = 'interest-chip' + (selectedInterests.includes(int) ? ' selected' : '');
+    chip.textContent = int;
+    chip.onclick = () => {
+      if (selectedInterests.includes(int)) {
+        selectedInterests = selectedInterests.filter(x => x !== int);
+        chip.classList.remove('selected');
+      } else {
+        selectedInterests.push(int);
+        chip.classList.add('selected');
+      }
+    };
+    box.appendChild(chip);
+  });
+}
+
+$('addCustomInterestBtn').onclick = () => {
+  const val = $('customInterestInput').value.trim();
+  if (!val) return;
+  if (selectedInterests.includes(val)) return toast('已存在该兴趣', 'error');
+  selectedInterests.push(val);
+  // 添加到 UI
+  const box = $('interestGrid');
+  const chip = document.createElement('span');
+  chip.className = 'interest-chip selected';
+  chip.innerHTML = `${val} <i class="fa-solid fa-xmark"></i>`;
+  chip.querySelector('i').onclick = (e) => {
+    e.stopPropagation();
+    selectedInterests = selectedInterests.filter(x => x !== val);
+    chip.remove();
+  };
+  box.appendChild(chip);
+  $('customInterestInput').value = '';
+};
+
+// Enter key for custom interest
+$('customInterestInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') $('addCustomInterestBtn').click();
+});
+
+$('onDone').onclick = async () => {
+  const name = $('onName').value.trim();
+  const rawCity = $('onCity').value.trim();
+  if (!name) return toast('请填写昵称', 'error');
+  if (selectedInterests.length < 2) return toast('请至少选择 2 个兴趣标签', 'error');
+  
+  const normalizedCity = normalizeCity(rawCity);
+  const profile = {
+    uid: currentUser.uid, name, email: currentUser.email,
+    photoURL: currentUser.photoURL || null, city: normalizedCity,
+    rawCity: rawCity, // 保留原始输入，方便用户编辑
+    interests: selectedInterests, onboarded: true,
+    createdAt: serverTimestamp(), following: [], followers: [],
+    stats: { views: 0, likes: 0 }
+  };
+  await setDoc(doc(db, 'users', currentUser.uid), profile);
+  userProfile = profile;
+  $('onboard').style.display = 'none';
+  $('app').style.display = 'flex';
+  initApp();
+};
+
+/* ============================================================
+   6. EDIT PROFILE LOGIC
+============================================================ */
+let editSelectedInterests = [];
+
+$('editProfileBtn').onclick = () => {
+  $('editName').value = userProfile.name || '';
+  $('editCity').value = userProfile.rawCity || userProfile.city || '';
+  editSelectedInterests = [...(userProfile.interests || [])];
+  renderEditInterestGrid();
+  openModal('editProfileModal');
+};
+
+function renderEditInterestGrid() {
+  const box = $('editInterestGrid');
+  box.innerHTML = '';
+  editSelectedInterests.forEach(int => {
+    const chip = document.createElement('span');
+    chip.className = 'interest-chip selected';
+    chip.innerHTML = `${int} <i class="fa-solid fa-xmark"></i>`;
+    chip.querySelector('i').onclick = () => {
+      editSelectedInterests = editSelectedInterests.filter(x => x !== int);
+      renderEditInterestGrid();
+    };
+    box.appendChild(chip);
+  });
+}
+
+$('editAddCustomInterestBtn').onclick = () => {
+  const val = $('editCustomInterestInput').value.trim();
+  if (!val) return;
+  if (editSelectedInterests.includes(val)) return toast('已存在该兴趣', 'error');
+  editSelectedInterests.push(val);
+  renderEditInterestGrid();
+  $('editCustomInterestInput').value = '';
+};
+
+$('editCustomInterestInput').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') $('editAddCustomInterestBtn').click();
+});
+
+$('saveProfileBtn').onclick = async () => {
+  const name = $('editName').value.trim();
+  const rawCity = $('editCity').value.trim();
+  if (!name) return toast('请填写昵称', 'error');
+  if (editSelectedInterests.length < 1) return toast('请至少保留 1 个兴趣', 'error');
+
+  const normalizedCity = normalizeCity(rawCity);
+  const updates = {
+    name,
+    city: normalizedCity,
+    rawCity: rawCity,
+    interests: editSelectedInterests
+  };
+
+  await updateDoc(doc(db, 'users', currentUser.uid), updates);
+  userProfile = { ...userProfile, ...updates };
+  closeModal('editProfileModal');
+  toast('资料已更新', 'success');
+  
+  // 刷新 UI
+  $('profileName').textContent = userProfile.name;
+  $('cityLabel').textContent = userProfile.rawCity || '未设置';
+  loadBuddies(); // refresh buddy list location text
+};
+
+/* ============================================================
+   7. NAVIGATION
+============================================================ */
+const topNavHTML = {
+  study: `<div class="top-nav-item active" data-sub="sub-kanban">看板</div><div class="top-nav-item" data-sub="sub-plan">日计划</div><div class="top-nav-item" data-sub="sub-okr">目标OKR</div><div class="top-nav-item" data-sub="sub-habit">小习惯</div>`,
+  buddy: `<div class="top-nav-item active">搭友</div><div class="top-nav-item">消息</div><div class="top-nav-item">互动</div>`,
+  discover: `<div class="top-nav-item active" data-d="disc-findbuddy">找搭子</div><div class="top-nav-item" data-d="disc-groups">找小组</div><div class="top-nav-item" data-d="disc-following">关注</div><div class="top-nav-item" data-d="disc-plaza">操场</div><div class="top-nav-item" data-d="disc-nearby">同城</div>`,
+  profile: `<div class="top-nav-item active">我的</div>`
+};
+
+function renderTopNav(tab) {
+  const nav = $('topNav');
+  nav.innerHTML = topNavHTML[tab] || '';
+  nav.querySelectorAll('[data-sub]').forEach(el => {
+    el.onclick = () => {
+      nav.querySelectorAll('[data-sub]').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      $$('#tab-study .sub-content').forEach(s => s.classList.remove('active'));
+      $(el.dataset.sub).classList.add('active');
+    };
+  });
+  nav.querySelectorAll('[data-d]').forEach(el => {
+    el.onclick = () => {
+      nav.querySelectorAll('[data-d]').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      $$('#tab-discover .disc-tab').forEach(s => s.classList.add('hidden'));
+      $(el.dataset.d).classList.remove('hidden');
+      if (el.dataset.d === 'disc-following') loadFollowingTab();
+      if (el.dataset.d === 'disc-nearby') loadNearby();
+      if (el.dataset.d === 'disc-plaza') loadFeed();
+      if (el.dataset.d === 'disc-groups') loadRooms();
+      if (el.dataset.d === 'disc-findbuddy') renderMatches([]);
+    };
+  });
+}
+
+$$('.nav-item').forEach(n => {
+  n.onclick = () => {
+    const tab = n.dataset.tab;
+    $$('.nav-item').forEach(x => x.classList.remove('active'));
+    n.classList.add('active');
+    $$('.content-area').forEach(a => a.classList.remove('active'));
+    $(`tab-${tab}`).classList.add('active');
+    renderTopNav(tab);
+  };
+});
+
+/* ============================================================
+   8. INIT APP
+============================================================ */
+function initApp() {
+  $('profileAvatar').innerHTML = userProfile.photoURL
+    ? `<img src="${userProfile.photoURL}">` : userProfile.name.charAt(0).toUpperCase();
+  $('profileName').textContent = userProfile.name;
+  $('profileEmail').textContent = userProfile.email;
+  if (userProfile.email === 'yangyang1913@gmail.com') $('adminBadge').classList.remove('hidden');
+  $('cityLabel').textContent = userProfile.rawCity || '未设置';
+
+  renderTopNav('study');
+  loadDashboard();
+  loadHabits();
+  loadOKRs();
+  loadPlans();
+  loadFeed();
+  loadBuddies();
+  loadRooms();
+  loadMyPosts();
+  loadProfileStats();
+
+  $('openOkrBtn').onclick = () => openModal('okrModal');
+  $('openPlanBtn').onclick = () => openModal('planModal');
+  $('openPostBtn').onclick = () => openModal('postModal');
+  $('openPostBtn2').onclick = () => openModal('postModal');
+  $('openRoomBtn').onclick = () => openModal('createRoomModal');
+  $('fabBtn').onclick = () => { openModal('timerModal'); updateTimerDisplay(); };
+  $('aiMatchBtn').onclick = runAIMatch;
+}
+
+/* ============================================================
+   9. DONUT CHART
+============================================================ */
+async function loadDashboard() {
+  const today = todayStr();
+  const q = query(collection(db, 'focus_sessions'), where('uid', '==', currentUser.uid), where('date', '==', today));
+  const snap = await getDocs(q);
+  const sessions = snap.docs.map(d => d.data());
+  const total = sessions.reduce((s, x) => s + (x.minutes || 0), 0);
+  $('dashTotal').textContent = `总计 ${total} 分钟`;
+  $('dashDate').textContent = fmtDate(new Date());
+
+  const grouped = {};
+  sessions.forEach(s => { const t = s.tag || '其他'; grouped[t] = (grouped[t] || 0) + (s.minutes || 0); });
+
+  const palette = ['#f5a3a3','#f5d1a3','#a3c9f5','#c9a3f5','#a3f5c9','#f5c9a3','#d9d9d9'];
+  const donut = $('donut'); const legend = $('legend'); legend.innerHTML = '';
+  if (total === 0) { donut.style.background = '#f0f0f0'; $('donutVal').textContent = '0h'; }
+  else {
+    let cumulative = 0; const stops = []; const entries = Object.entries(grouped);
+    entries.forEach(([tag, mins], i) => {
+      const pct = (mins / total) * 100;
+      stops.push(`${palette[i % palette.length]} ${cumulative}% ${cumulative + pct}%`);
+      cumulative += pct;
+      const item = document.createElement('div'); item.className = 'legend-item';
+      item.innerHTML = `<span class="legend-dot" style="background:${palette[i%palette.length]}"></span> ${tag} ${mins}分`;
+      legend.appendChild(item);
+    });
+    donut.style.background = `conic-gradient(${stops.join(', ')})`;
+    $('donutVal').textContent = (total / 60).toFixed(1) + 'h';
+  }
+
+  const pSnap = await getDocs(query(collection(db,'daily_plans'), where('uid','==',currentUser.uid), where('date','==',today), limit(1)));
+  $('dashPlan').innerHTML = pSnap.empty
+    ? `<div class="empty-state" style="padding:20px"><i class="fa-solid fa-clipboard-list"></i><p>暂无今日计划</p></div>`
+    : `<div style="font-size:13px;line-height:1.6">${pSnap.docs[0].data().content}</div>`;
+}
+
+/* ============================================================
+   10. HABITS (增加/删除)
+============================================================ */
+async function loadHabits() {
+  const q = query(collection(db, 'habits'), where('uid','==',currentUser.uid));
+  let snap = await getDocs(q);
+  if (snap.empty) {
+    for (const name of ['早起','散步','早睡','阅读']) {
+      await addDoc(collection(db,'habits'), { uid: currentUser.uid, name, createdAt: serverTimestamp() });
+    }
+    snap = await getDocs(q);
+  }
+  const list = $('habitList'); list.innerHTML = '';
+  const dashList = $('dashHabits'); dashList.innerHTML = '';
+  let done = 0; const today = todayStr();
+
+  snap.forEach(d => {
+    const data = d.data();
+    const ok = data.lastCompleted === today;
+    if (ok) done++;
+
+    const item = document.createElement('div');
+    item.className = 'habit-item';
+    item.innerHTML = `
+      <div class="habit-icon"><i class="fa-solid fa-star"></i></div>
+      <div class="habit-info"><h4>${data.name}</h4><p>0/1 每天</p></div>
+      <div style="display:flex; gap:6px; align-items:center;">
+        <button class="habit-btn ${ok?'checked':''}" data-id="${d.id}">${ok?'已完成 ✓':'打卡'}</button>
+        <button class="btn-text danger" data-del="${d.id}"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    `;
+    list.appendChild(item);
+
+    item.querySelector('.habit-btn').onclick = () => toggleHabit(d.id, !ok);
+    item.querySelector('[data-del]').onclick = async () => {
+      if (confirm(`确定要删除习惯「${data.name}」吗？`)) {
+        await deleteDoc(doc(db, 'habits', d.id));
+        toast('习惯已删除', 'success');
+        loadHabits(); loadDashboard();
+      }
+    };
+
+    const dItem = document.createElement('div');
+    dItem.className = 'habit-item';
+    dItem.style.padding = '10px';
+    dItem.innerHTML = `
+      <div class="habit-icon" style="width:32px;height:32px;font-size:13px"><i class="fa-solid fa-star"></i></div>
+      <div class="habit-info" style="margin-left:10px"><h4 style="font-size:13px">${data.name}</h4></div>
+      <div style="color:${ok?'var(--success)':'var(--light)'};font-size:18px"><i class="fa-solid ${ok?'fa-check-circle':'fa-circle'}"></i></div>
+    `;
+    dashList.appendChild(dItem);
+  });
+
+  $('habitCount').textContent = `${done}/${snap.size}`;
+  $('habitStreak').textContent = `连续 ${done} 天`;
+}
+
+async function toggleHabit(id, toCheck) {
+  await updateDoc(doc(db,'habits',id), { lastCompleted: toCheck ? todayStr() : null });
+  if (toCheck) toast('打卡成功！', 'success');
+  loadHabits(); loadDashboard();
+}
+
+$('addHabitBtn').onclick = async () => {
+  const name = $('newHabit').value.trim();
+  if (!name) return toast('请输入习惯名称', 'error');
+  await addDoc(collection(db,'habits'), { uid: currentUser.uid, name, createdAt: serverTimestamp() });
+  $('newHabit').value = '';
+  toast('添加成功', 'success');
+  loadHabits();
+};
+
+/* ============================================================
+   11. OKRs
+============================================================ */
+async function loadOKRs() {
+  const q = query(collection(db,'okrs'), where('uid','==',currentUser.uid), orderBy('createdAt','desc'));
+  const snap = await getDocs(q);
+  const list = $('okrList'); list.innerHTML = '';
+  $('okrEmpty').style.display = snap.empty ? 'flex' : 'none';
+  snap.forEach(d => {
+    const o = d.data();
+    const days = Math.ceil((new Date(o.deadline) - new Date()) / 86400000);
+    const el = document.createElement('div');
+    el.className = 'okr-card';
+    el.innerHTML = `
+      <div class="okr-head"><span>📅 ${o.deadline.replace(/-/g,'.')} 剩 ${Math.max(0,days)} 天</span><span class="badge badge-orange">搭友可见</span></div>
+      <div class="okr-title">${o.title}</div>
+      <div class="progress"><div class="progress-fill" style="width:${o.progress||0}%"></div></div>
+      <div class="utility-between" style="margin-top:8px">
+        <span style="font-size:11px;color:var(--sub)">进度 ${o.progress||0}%</span>
+        <button class="btn-text danger" data-del="${d.id}"><i class="fa-solid fa-trash"></i> 删除</button>
+      </div>
+    `;
+    list.appendChild(el);
+    el.querySelector('[data-del]').onclick = async () => {
+      if (confirm('确定删除？')) { await deleteDoc(doc(db,'okrs',d.id)); toast('已删除'); loadOKRs(); }
+    };
+  });
+}
+
+$('saveOkrBtn').onclick = async () => {
+  const t = $('okrTitle').value.trim(), d = $('okrDate').value;
+  if (!t || !d) return toast('请填写完整', 'error');
+  await addDoc(collection(db,'okrs'), { uid: currentUser.uid, title: t, deadline: d, progress: 0, createdAt: serverTimestamp() });
+  closeModal('okrModal'); $('okrTitle').value = ''; $('okrDate').value = '';
+  toast('已保存', 'success'); loadOKRs();
+};
+
+/* ============================================================
+   12. DAILY PLANS
+============================================================ */
+async function loadPlans() {
+  const q = query(collection(db,'daily_plans'), where('uid','==',currentUser.uid), orderBy('createdAt','desc'), limit(20));
+  const snap = await getDocs(q);
+  const list = $('planList'); list.innerHTML = '';
+  $('planEmpty').style.display = snap.empty ? 'flex' : 'none';
+  snap.forEach(d => {
+    const p = d.data();
+    const el = document.createElement('div');
+    el.className = 'plan-item';
+    el.innerHTML = `
+      <div class="plan-date"><span>${fmtDate(p.date)}</span><span class="badge badge-orange">搭友可见</span></div>
+      <div class="plan-content">${p.content}</div>
+      ${p.imageBase64 ? `<img class="plan-img" src="${p.imageBase64}">` : ''}
+      <div class="plan-actions"><button class="btn-text danger" data-del="${d.id}"><i class="fa-solid fa-trash"></i> 删除</button></div>
+    `;
+    list.appendChild(el);
+    el.querySelector('[data-del]').onclick = async () => {
+      if (confirm('确定删除这条计划？')) { await deleteDoc(doc(db,'daily_plans',d.id)); toast('已删除'); loadPlans(); loadDashboard(); }
+    };
+  });
+}
+
+$('planImg').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 1024*1024) return toast('图片不能超过 1MB', 'error');
+  const r = new FileReader();
+  r.onload = ev => { currentPlanImg = ev.target.result; $('planPreview').src = currentPlanImg; $('planPreview').style.display = 'block'; };
+  r.readAsDataURL(f);
+};
+
+$('savePlanBtn').onclick = async () => {
+  const c = $('planContent').value.trim();
+  if (!c) return toast('请输入内容', 'error');
+  await addDoc(collection(db,'daily_plans'), {
+    uid: currentUser.uid, content: c, imageBase64: currentPlanImg,
+    date: todayStr(), createdAt: serverTimestamp()
+  });
+  closeModal('planModal');
+  $('planContent').value = ''; $('planImg').value = '';
+  $('planPreview').style.display = 'none'; currentPlanImg = null;
+  toast('提交成功', 'success'); loadPlans(); loadDashboard();
+};
+
+/* ============================================================
+   13. FEED / POSTS
+============================================================ */
+$('postImg').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 1024*1024) return toast('图片不能超过 1MB', 'error');
+  const r = new FileReader();
+  r.onload = ev => { currentPostImg = ev.target.result; $('postPreview').src = currentPostImg; $('postPreview').style.display = 'block'; };
+  r.readAsDataURL(f);
+};
+
+$('savePostBtn').onclick = async () => {
+  const c = $('postContent').value.trim();
+  if (!c) return toast('请输入内容', 'error');
+  await addDoc(collection(db,'posts'), {
+    uid: currentUser.uid, authorName: userProfile.name,
+    authorAvatar: userProfile.photoURL,
+    content: c, imageBase64: currentPostImg,
+    city: userProfile.city || '', likes: 0, likedBy: [], createdAt: serverTimestamp()
+  });
+  closeModal('postModal');
+  $('postContent').value = ''; $('postImg').value = '';
+  $('postPreview').style.display = 'none'; currentPostImg = null;
+  toast('发布成功', 'success'); loadFeed(); loadMyPosts();
+};
+
+async function loadFeed() {
+  const q = query(collection(db,'posts'), orderBy('createdAt','desc'), limit(30));
+  const snap = await getDocs(q);
+  const list = $('feedList'); list.innerHTML = '';
+  if (snap.empty) { list.innerHTML = `<div class="empty-state"><i class="fa-solid fa-newspaper"></i><p>暂无动态</p></div>`; return; }
+  snap.forEach(d => {
+    const p = d.data();
+    const liked = (p.likedBy||[]).includes(currentUser.uid);
+    const el = document.createElement('div');
+    el.className = 'feed-item';
+    el.innerHTML = `
+      <div class="feed-head">
+        <div class="feed-user">
+          <div class="feed-avatar">${p.authorAvatar?`<img src="${p.authorAvatar}">`:p.authorName?.charAt(0)||'U'}</div>
+          <div><div class="feed-name">${p.authorName||'匿名'}</div><div class="feed-time">${fmtTs(p.createdAt)}</div></div>
+        </div>
+        ${p.city?`<span class="badge badge-orange">${p.city}</span>`:''}
+      </div>
+      <div class="feed-body">${p.content}</div>
+      ${p.imageBase64?`<img src="${p.imageBase64}" style="width:100%;border-radius:8px;margin-bottom:12px">`:''}
+      <div class="feed-actions">
+        <button class="feed-action ${liked?'liked':''}" data-like="${d.id}"><i class="fa-${liked?'solid':'regular'} fa-thumbs-up"></i> ${p.likes||0}</button>
+        <span class="feed-action"><i class="fa-regular fa-comment"></i> 0</span>
+        ${p.uid===currentUser.uid?`<button class="feed-action" data-del="${d.id}"><i class="fa-solid fa-trash"></i> 删除</button>`:''}
+      </div>
+    `;
+    list.appendChild(el);
+    const likeBtn = el.querySelector('[data-like]');
+    likeBtn.onclick = async () => {
+      if (liked) await updateDoc(doc(db,'posts',d.id), { likes: increment(-1), likedBy: arrayRemove(currentUser.uid) });
+      else await updateDoc(doc(db,'posts',d.id), { likes: increment(1), likedBy: arrayUnion(currentUser.uid) });
+      loadFeed();
+    };
+    const delBtn = el.querySelector('[data-del]');
+    if (delBtn) delBtn.onclick = async () => {
+      if (confirm('删除这条动态？')) { await deleteDoc(doc(db,'posts',d.id)); toast('已删除'); loadFeed(); loadMyPosts(); }
+    };
+  });
+}
+
+async function loadMyPosts() {
+  const q = query(collection(db,'posts'), where('uid','==',currentUser.uid), orderBy('createdAt','desc'), limit(30));
+  const snap = await getDocs(q);
+  const grid = $('myPostsGrid'); grid.innerHTML = '';
+  if (snap.empty) { grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:var(--light);font-size:12px;padding:20px">还没有笔记</div>`; return; }
+  snap.forEach(d => {
+    const p = d.data();
+    const cell = document.createElement('div');
+    cell.className = 'xhs-cell';
+    cell.innerHTML = p.imageBase64 ? `<img src="${p.imageBase64}">` : `<span style="padding:8px;font-size:11px;color:#fff;background:linear-gradient(135deg,#ff8c00,#ffb347);width:100%;height:100%;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden">${p.content.slice(0,30)}</span>`;
+    cell.onclick = () => { if (confirm('删除这条笔记？')) deleteDoc(doc(db,'posts',d.id)).then(()=>{toast('已删除');loadMyPosts();loadFeed();}); };
+    grid.appendChild(cell);
+  });
+}
+
+/* ============================================================
+   14. AI MATCHING (with Normalized Location)
+============================================================ */
+async function runAIMatch() {
+  toast('AI 正在分析你的兴趣标签...', 'info');
+  const snap = await getDocs(collection(db,'users'));
+  const candidates = snap.docs.map(d=>d.data()).filter(u=>u.uid!==currentUser.uid);
+  if (candidates.length === 0) return toast('暂无其他用户', 'error');
+
+  const myInt = new Set(userProfile.interests||[]);
+  const myCityNormalized = userProfile.city; // already normalized on save
+
+  const scored = candidates.map(u => {
+    const their = u.interests||[];
+    const overlap = their.filter(i=>myInt.has(i)).length;
+    const sameCity = u.city === myCityNormalized; // exact match on normalized city
+    const score = overlap*2 + (sameCity?3:0); // Give higher weight to same city
+    return {...u, score, overlap, sameCity};
+  }).sort((a,b)=>b.score-a.score).slice(0,20);
+
+  let aiRanking = null;
+  try {
+    const prompt = `You are a study-partner matcher. My interests: ${[...myInt].join(', ')}. My city: ${userProfile.rawCity || userProfile.city}. Candidates:\n${scored.slice(0,10).map((c,i)=>`${i+1}. ${c.name} - interests: ${(c.interests||[]).join(',')} - city: ${c.rawCity || c.city}`).join('\n')}\n\nReturn the top 5 candidate numbers ranked best-first, comma-separated. Only numbers.`;
+    const res = await fetch(AI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer ' + AI_KEY },
+      body: JSON.stringify({ model:'deepseek-chat', messages:[{role:'user',content:prompt}], temperature:0.3, max_tokens:50 })
+    });
+    const j = await res.json();
+    const text = j.choices?.[0]?.message?.content || '';
+    const nums = text.match(/\d+/g);
+    if (nums) aiRanking = nums.map(n=>scored[parseInt(n)-1]).filter(Boolean);
+  } catch(e) { console.warn('AI ranking failed:', e); }
+
+  const final = aiRanking && aiRanking.length ? aiRanking : scored.slice(0,5);
+  renderMatches(final);
+}
+
+function renderMatches(list) {
+  const box = $('matchList'); box.innerHTML = '';
+  if (!list.length) { box.innerHTML = `<div class="empty-state"><i class="fa-solid fa-users"></i><p>暂无匹配</p></div>`; return; }
+  list.forEach(u => {
+    const el = document.createElement('div');
+    el.className = 'buddy-item';
+    el.innerHTML = `
+      <div class="buddy-info">
+        <div class="buddy-avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.name||'?').charAt(0)}</div>
+        <div class="buddy-text">
+          <h4>${u.name} ${u.sameCity?'<span class="badge badge-blue" style="margin-left:4px">同城</span>':''}</h4>
+          <p>${(u.interests||[]).join(' · ')}</p>
+        </div>
+      </div>
+      <div class="buddy-actions">
+        <button class="icon-btn" data-add="${u.uid}">+ 搭友</button>
+      </div>
+    `;
+    box.appendChild(el);
+    el.querySelector('[data-add]').onclick = async () => {
+      await updateDoc(doc(db,'users',currentUser.uid), { following: arrayUnion(u.uid) });
+      await addDoc(collection(db,'notifications'), { to: u.uid, from: currentUser.uid, type:'follow', createdAt: serverTimestamp() });
+      toast('已添加搭友', 'success');
+      loadBuddies();
+    };
+  });
+}
+
+/* ============================================================
+   15. BUDDIES LIST
+============================================================ */
+async function loadBuddies() {
+  const list = $('buddyList'); list.innerHTML = '';
+  const following = userProfile.following || [];
+  if (!following.length) { $('buddyEmpty').style.display='flex'; return; }
+  $('buddyEmpty').style.display = 'none';
+  for (const uid of following) {
+    const s = await getDoc(doc(db,'users',uid));
+    if (!s.exists()) continue;
+    const u = s.data();
+    const el = document.createElement('div');
+    el.className = 'buddy-item';
+    el.innerHTML = `
+      <div class="buddy-info">
+        <div class="buddy-avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.name||'?').charAt(0)}</div>
+        <div class="buddy-text"><h4>${u.name}</h4><p>${u.rawCity || u.city || '未知'} · ${(u.interests||[]).slice(0,2).join('/')}</p></div>
+      </div>
+      <div class="buddy-actions">
+        <button class="icon-btn" data-chat="${u.uid}" data-name="${u.name}">私聊</button>
+        <button class="icon-btn" data-unfollow="${u.uid}" style="background:#fff2f0;color:var(--danger)">移除</button>
+      </div>
+    `;
+    list.appendChild(el);
+    el.querySelector('[data-chat]').onclick = () => openChat(u.uid, u.name, u.photoURL);
+    el.querySelector('[data-unfollow]').onclick = async () => {
+      if (confirm('移除这位搭友？')) {
+        await updateDoc(doc(db,'users',currentUser.uid), { following: arrayRemove(u.uid) });
+        userProfile.following = userProfile.following.filter(x=>x!==u.uid);
+        toast('已移除'); loadBuddies();
+      }
+    };
+  }
+}
+
+/* ============================================================
+   16. CHAT
+============================================================ */
+async function openChat(peerUid, peerName, peerAvatar) {
+  currentChatPeer = peerUid;
+  $('chatName').textContent = peerName;
+  $('chatAvatar').innerHTML = peerAvatar ? `<img src="${peerAvatar}">` : peerName.charAt(0);
+  $('chatMsgs').innerHTML = '';
+  openModal('chatModal');
+
+  const chatId = [currentUser.uid, peerUid].sort().join('_');
+  if (peerUnsub) peerUnsub();
+  peerUnsub = onSnapshot(
+    query(collection(db,`chats/${chatId}/messages`), orderBy('createdAt','asc'), limit(100)),
+    snap => {
+      const box = $('chatMsgs'); box.innerHTML = '';
+      snap.forEach(d => {
+        const m = d.data();
+        const mine = m.from === currentUser.uid;
+        const bubble = document.createElement('div');
+        bubble.className = `bubble ${mine?'me':'them'}`;
+        let html = '';
+        if (m.text) html += `<div>${m.text}</div>`;
+        if (m.fileBase64) {
+          if (m.fileType?.startsWith('image/')) html += `<img src="${m.fileBase64}">`;
+          else html += `<div style="display:flex;gap:6px;align-items:center;font-size:12px"><i class="fa-solid fa-file"></i> ${m.fileName}</div>`;
+        }
+        bubble.innerHTML = html;
+        box.appendChild(bubble);
+      });
+      box.scrollTop = box.scrollHeight;
+    }
+  );
+}
+
+$('chatAttachBtn').onclick = () => $('chatFile').click();
+$('chatFile').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 2*1024*1024) return toast('文件不能超过 2MB', 'error');
+  const r = new FileReader();
+  r.onload = ev => { currentChatFile = ev.target.result; currentChatFileName = f.name; toast('文件已就绪', 'info'); };
+  r.readAsDataURL(f);
+};
+
+$('chatSendBtn').onclick = async () => {
+  const text = $('chatText').value.trim();
+  if (!text && !currentChatFile) return;
+  if (!currentChatPeer) return;
+  const chatId = [currentUser.uid, currentChatPeer].sort().join('_');
+  await addDoc(collection(db,`chats/${chatId}/messages`), {
+    from: currentUser.uid, text: text || null,
+    fileBase64: currentChatFile, fileName: currentChatFileName,
+    fileType: currentChatFile ? (currentChatFileName?.endsWith('.pdf')?'application/pdf': 'image/*') : null,
+    createdAt: serverTimestamp()
+  });
+  $('chatText').value = ''; currentChatFile = null; currentChatFileName = null;
+};
+$('chatText').addEventListener('keypress', e => { if (e.key==='Enter') $('chatSendBtn').click(); });
+
+$('startCallBtn').onclick = () => { startCall($('chatName').textContent); };
+
+/* ============================================================
+   17. CALLING
+============================================================ */
+async function startCall(name) {
+  $('callName').textContent = name;
+  $('callStatus').textContent = '正在连接...';
+  openModal('callModal');
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    $('localVideo').srcObject = localStream;
+    $('remoteVideo').srcObject = localStream;
+    setTimeout(()=>$('callStatus').textContent = '通话中 00:00', 1200);
+  } catch(e) {
+    toast('无法访问摄像头/麦克风', 'error');
+    setTimeout(()=>closeModal('callModal'), 1500);
+  }
+}
+function endCall() {
+  if (localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream = null; }
+  if (screenStream) { screenStream.getTracks().forEach(t=>t.stop()); screenStream = null; }
+  $('localVideo').srcObject = null; $('remoteVideo').srcObject = null;
+  closeModal('callModal');
+}
+$('endCallBtn').onclick = endCall;
+$('muteBtn').onclick = function() {
+  if (!localStream) return;
+  const t = localStream.getAudioTracks()[0]; if (!t) return;
+  t.enabled = !t.enabled;
+  this.classList.toggle('active', !t.enabled);
+  this.innerHTML = `<i class="fa-solid fa-${t.enabled?'microphone':'microphone-slash'}"></i>`;
+};
+$('videoBtn').onclick = function() {
+  if (!localStream) return;
+  const t = localStream.getVideoTracks()[0]; if (!t) return;
+  t.enabled = !t.enabled;
+  this.classList.toggle('active', !t.enabled);
+  this.innerHTML = `<i class="fa-solid fa-${t.enabled?'video':'video-slash'}"></i>`;
+};
+$('screenBtn').onclick = async function() {
+  try {
+    if (screenStream) {
+      screenStream.getTracks().forEach(t=>t.stop()); screenStream = null;
+      $('remoteVideo').srcObject = localStream;
+      this.classList.remove('active');
+    } else {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      $('remoteVideo').srcObject = screenStream;
+      this.classList.add('active');
+      screenStream.getVideoTracks()[0].onended = () => {
+        screenStream = null; $('remoteVideo').srcObject = localStream; $('screenBtn').classList.remove('active');
+      };
+    }
+  } catch(e) { toast('无法共享屏幕', 'error'); }
+};
+
+/* ============================================================
+   18. STUDY ROOMS
+============================================================ */
+async function loadRooms() {
+  const q = query(collection(db,'study_rooms'), orderBy('createdAt','desc'), limit(30));
+  const snap = await getDocs(q);
+  const box = $('roomList'); box.innerHTML = '';
+  if (snap.empty) { box.innerHTML = `<div class="empty-state"><i class="fa-solid fa-door-open"></i><p>暂无私塾房，点上方创建</p></div>`; return; }
+  snap.forEach(d => {
+    const r = d.data();
+    const isMine = r.hostUid === currentUser.uid;
+    const el = document.createElement('div');
+    el.className = 'buddy-item';
+    el.innerHTML = `
+      <div class="buddy-info">
+        <div class="buddy-avatar" style="background:#e6f4ff;color:var(--info)"><i class="fa-solid fa-book-open"></i></div>
+        <div class="buddy-text">
+          <h4>${r.name} ${r.privacy==='private'?'<span class="badge badge-danger">私密</span>':''}</h4>
+          <p>${r.hostName} · ${(r.members||[]).length} 人 · ${r.duration} 分钟</p>
+        </div>
+      </div>
+      <div class="buddy-actions">
+        ${isMine?`<button class="icon-btn" data-del="${d.id}" style="background:#fff2f0;color:var(--danger)">删除</button>`:
+                  `<button class="icon-btn" data-join="${d.id}">加入</button>`}
+      </div>
+    `;
+    box.appendChild(el);
+    const j = el.querySelector('[data-join]');
+    if (j) j.onclick = () => joinRoom(d.id);
+    const dl = el.querySelector('[data-del]');
+    if (dl) dl.onclick = async () => {
+      if (confirm('删除房间？')) { await deleteDoc(doc(db,'study_rooms',d.id)); toast('已删除'); loadRooms(); }
+    };
+  });
+}
+
+$('createRoomBtn').onclick = async () => {
+  const name = $('roomName').value.trim();
+  const privacy = $('roomPrivacy').value;
+  const duration = parseInt($('roomDuration').value) || 25;
+  if (!name) return toast('请输入房间名', 'error');
+  const ref = await addDoc(collection(db,'study_rooms'), {
+    name, privacy, duration,
+    hostUid: currentUser.uid, hostName: userProfile.name,
+    members: [currentUser.uid], createdAt: serverTimestamp()
+  });
+  $('roomName').value = '';
+  closeModal('createRoomModal');
+  toast('创建成功', 'success');
+  joinRoom(ref.id);
+};
+
+async function joinRoom(roomId) {
+  activeRoomId = roomId;
+  const rSnap = await getDoc(doc(db,'study_rooms',roomId));
+  if (!rSnap.exists()) return toast('房间不存在', 'error');
+  const r = rSnap.data();
+  myRoomRole = r.hostUid === currentUser.uid ? 'host' : 'guest';
+  await updateDoc(doc(db,'study_rooms',roomId), { members: arrayUnion(currentUser.uid) });
+
+  $('roomTitle').textContent = r.name;
+  $('roomMeta').textContent = `${(r.members||[]).length} 人在线`;
+  $('roomHostBtn').style.display = myRoomRole === 'host' ? 'flex' : 'none';
+  openModal('roomModal');
+
+  try { localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); } catch(e) {}
+
+  if (activeRoomUnsub) activeRoomUnsub();
+  activeRoomUnsub = onSnapshot(doc(db,'study_rooms',roomId), snap => {
+    const room = snap.data(); if (!room) return;
+    $('roomMeta').textContent = `${(room.members||[]).length} 人在线`;
+    renderRoomMembers(room.members || []);
+  });
+}
+
+async function renderRoomMembers(uids) {
+  const box = $('roomMembers'); box.innerHTML = '';
+  for (const uid of uids) {
+    const s = await getDoc(doc(db,'users',uid));
+    if (!s.exists()) continue;
+    const u = s.data();
+    const isHost = (await getDoc(doc(db,'study_rooms',activeRoomId))).data().hostUid === uid;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:#1a1a1a;margin-bottom:8px';
+    row.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700">${u.name?.charAt(0)||'?'}</div>
+        <div><div style="font-size:13px;font-weight:600">${u.name}${isHost?' 👑':''}</div><div style="font-size:11px;color:#888">专注中</div></div>
+      </div>
+      ${myRoomRole==='host' && !isHost ? `<button class="icon-btn" data-kick="${uid}" style="background:#fff2f0;color:var(--danger)">踢出</button>` : ''}
+    `;
+    box.appendChild(row);
+    const k = row.querySelector('[data-kick]');
+    if (k) k.onclick = async () => {
+      if (confirm('踢出该成员？')) {
+        await updateDoc(doc(db,'study_rooms',activeRoomId), { members: arrayRemove(uid) });
+        toast('已踢出');
+      }
+    };
+  }
+}
+
+$('roomSendBtn').onclick = async () => {
+  const text = $('roomMsg').value.trim(); if (!text) return;
+  await addDoc(collection(db,`study_rooms/${activeRoomId}/messages`), {
+    from: currentUser.uid, fromName: userProfile.name, text, createdAt: serverTimestamp()
+  });
+  $('roomMsg').value = '';
+  toast('已发言', 'success');
+};
+
+$('roomMusicBtn').onclick = () => {
+  const moods = ['off','rain','brown','waves','forest'];
+  const current = moods.indexOf(currentMusic);
+  const next = moods[(current+1) % moods.length];
+  setMusic(next);
+  toast(`房间音乐: ${next === 'off' ? '关闭' : next}`, 'info');
+};
+
+$('roomAlarmBtn').onclick = () => {
+  const min = prompt('设置闹钟（分钟后）', '25');
+  if (!min || isNaN(min)) return;
+  setTimeout(() => { toast('⏰ 房间闹钟响起！', 'success'); }, parseInt(min)*60000);
+  toast(`已设置 ${min} 分钟后提醒`, 'info');
+};
+
+$('roomMuteBtn').onclick = function() {
+  if (!localStream) return;
+  const t = localStream.getAudioTracks()[0]; if (!t) return;
+  t.enabled = !t.enabled;
+  this.classList.toggle('active', !t.enabled);
+  this.innerHTML = `<i class="fa-solid fa-${t.enabled?'microphone':'microphone-slash'}"></i>`;
+};
+$('roomVideoBtn').onclick = function() {
+  if (!localStream) return;
+  const t = localStream.getVideoTracks()[0]; if (!t) return;
+  t.enabled = !t.enabled;
+  this.classList.toggle('active', !t.enabled);
+  this.innerHTML = `<i class="fa-solid fa-${t.enabled?'video':'video-slash'}"></i>`;
+};
+$('roomScreenBtn').onclick = async function() {
+  try {
+    const s = await navigator.mediaDevices.getDisplayMedia({ video:true });
+    toast('屏幕共享已开启', 'success');
+    s.getVideoTracks()[0].onended = () => toast('共享结束', 'info');
+  } catch(e) { toast('无法共享', 'error'); }
+};
+$('roomHostBtn').onclick = () => toast('主持面板（可踢人/静音）', 'info');
+
+async function leaveRoom() {
+  if (activeRoomId) {
+    try { await updateDoc(doc(db,'study_rooms',activeRoomId), { members: arrayRemove(currentUser.uid) }); } catch(e) {}
+  }
+  if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; }
+  if (localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream = null; }
+  activeRoomId = null; myRoomRole = null;
+  loadRooms();
+}
+
+/* ============================================================
+   19. TIMER + MUSIC
+============================================================ */
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds/60), s = timerSeconds%60;
+  $('timerDisplay').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+$('timerPlay').onclick = () => {
+  if (timerRunning) return;
+  timerRunning = true;
+  $('timerPlay').classList.add('hidden');
+  $('timerPause').classList.remove('hidden');
+  timerInterval = setInterval(() => {
+    if (timerSeconds > 0) { timerSeconds--; updateTimerDisplay(); }
+    else { stopTimer(); toast('专注完成！🎉', 'success'); }
+  }, 1000);
+};
+$('timerPause').onclick = () => {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  $('timerPlay').classList.remove('hidden');
+  $('timerPause').classList.add('hidden');
+};
+$('timerStop').onclick = () => { stopTimer(); toast('已重置'); };
+function stopTimer() {
+  timerRunning = false; clearInterval(timerInterval);
+  timerSeconds = 25 * 60; updateTimerDisplay();
+  $('timerPlay').classList.remove('hidden'); $('timerPause').classList.add('hidden');
+}
+
+$('timerFinishBtn').onclick = async () => {
+  const used = 25*60 - timerSeconds;
+  const mins = Math.floor(used/60);
+  if (mins < 1) return toast('专注时间太短', 'error');
+  const tag = $('timerTag').value.trim() || '专注';
+  await addDoc(collection(db,'focus_sessions'), {
+    uid: currentUser.uid, minutes: mins, tag, date: todayStr(), createdAt: serverTimestamp()
+  });
+  stopTimer();
+  setMusic('off');
+  closeModal('timerModal');
+  toast(`已记录 ${mins} 分钟专注`, 'success');
+  loadDashboard();
+};
+
+$$('#musicSelector .music-chip').forEach(chip => {
+  chip.onclick = () => {
+    $$('#musicSelector .music-chip').forEach(c=>c.classList.remove('selected'));
+    chip.classList.add('selected');
+    setMusic(chip.dataset.m);
+  };
+});
+function setMusic(type) {
+  currentMusic = type;
+  if (musicAudio) { try { musicAudio.stop(); } catch(e){} musicAudio = null; }
+  if (type === 'off') return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = 2 * ctx.sampleRate;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = type === 'brown' ? (Math.random()*2-1) * 0.5 : Math.random()*2-1;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buffer; src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    if (type === 'rain') { filter.type = 'highpass'; filter.frequency.value = 1000; }
+    else if (type === 'waves') { filter.type = 'lowpass'; filter.frequency.value = 400; }
+    else if (type === 'forest') { filter.type = 'bandpass'; filter.frequency.value = 800; }
+    else { filter.type = 'lowpass'; filter.frequency.value = 600; }
+    const gain = ctx.createGain(); gain.gain.value = 0.08;
+    src.connect(filter); filter.connect(gain); gain.connect(ctx.destination);
+    src.start();
+    musicAudio = { src, ctx, stop: () => src.stop() };
+  } catch(e) { console.warn('audio fail', e); }
+}
+
+/* ============================================================
+   20. PROFILE STATS & FOLLOW/NEARBY
+============================================================ */
+async function loadProfileStats() {
+  const followCount = (userProfile.following||[]).length;
+  const fansCount = (userProfile.followers||[]).length;
+  $('stFollow').textContent = followCount;
+  $('stFans').textContent = fansCount;
+  $('stViews').textContent = userProfile.stats?.views || 0;
+  $('stLikes').textContent = userProfile.stats?.likes || 0;
+}
+
+async function loadFollowingTab() {
+  const following = userProfile.following || [];
+  const box = $('followList'); box.innerHTML = '';
+  if (!following.length) { box.innerHTML = `<div class="empty-state"><i class="fa-solid fa-heart"></i><p>还没有关注</p></div>`; return; }
+  for (const uid of following) {
+    const s = await getDoc(doc(db,'users',uid));
+    if (!s.exists()) continue;
+    const u = s.data();
+    const el = document.createElement('div');
+    el.className = 'buddy-item';
+    el.innerHTML = `
+      <div class="buddy-info">
+        <div class="buddy-avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.name||'?').charAt(0)}</div>
+        <div class="buddy-text"><h4>${u.name}</h4><p>${u.rawCity||u.city||'未知'} · ${(u.interests||[]).slice(0,2).join('/')}</p></div>
+      </div>
+      <button class="icon-btn" data-unfollow="${uid}" style="background:#fff2f0;color:var(--danger)">取关</button>
+    `;
+    box.appendChild(el);
+    el.querySelector('[data-unfollow]').onclick = async () => {
+      await updateDoc(doc(db,'users',currentUser.uid), { following: arrayRemove(uid) });
+      userProfile.following = userProfile.following.filter(x=>x!==uid);
+      toast('已取关'); loadFollowingTab(); loadBuddies();
+    };
+  }
+}
+
+async function loadNearby() {
+  const box = $('nearbyList'); box.innerHTML = '';
+  const myCityNormalized = userProfile.city; // already normalized
+  const q = query(collection(db,'users'), where('city','==',myCityNormalized), limit(30));
+  const snap = await getDocs(q);
+  const others = snap.docs.map(d=>d.data()).filter(u=>u.uid!==currentUser.uid);
+  if (!others.length) { box.innerHTML = `<div class="empty-state"><i class="fa-solid fa-location-dot"></i><p>同城暂无其他用户</p></div>`; return; }
+  others.forEach(u => {
+    const el = document.createElement('div');
+    el.className = 'buddy-item';
+    el.innerHTML = `
+      <div class="buddy-info">
+        <div class="buddy-avatar">${u.photoURL?`<img src="${u.photoURL}">`:(u.name||'?').charAt(0)}</div>
+        <div class="buddy-text"><h4>${u.name}</h4><p>${u.rawCity||u.city} · ${(u.interests||[]).slice(0,2).join('/')}</p></div>
+      </div>
+      <button class="icon-btn" data-add="${u.uid}">+ 搭友</button>
+    `;
+    box.appendChild(el);
+    el.querySelector('[data-add]').onclick = async () => {
+      await updateDoc(doc(db,'users',currentUser.uid), { following: arrayUnion(u.uid) });
+      userProfile.following = [...(userProfile.following||[]), u.uid];
+      toast('已添加搭友', 'success'); loadBuddies();
+    };
+  });
+}
+
+console.log('[Study Partner] App initialized — Profile edit & Smart Location Matching active.');
+</script>
+</body>
+         </html>
