@@ -194,7 +194,7 @@ textarea.form-input{resize:vertical;min-height:90px}
 .chat-btn.attach{background:var(--bg);color:var(--sub)}
 .chat-btn.send{background:var(--primary);color:#fff}
 
-/* Call / Study Room */
+/* Call & Study Room */
 #callModal .modal-content,#roomModal .modal-content{height:100vh;max-height:100vh;border-radius:0;padding:0;background:#111;color:#fff;display:flex;flex-direction:column}
 .video-stage{flex:1;position:relative;background:#000;overflow:hidden}
 .video-stage video{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0}
@@ -208,6 +208,55 @@ textarea.form-input{resize:vertical;min-height:90px}
 .call-btn.danger{background:var(--danger)}
 .call-btn.active{background:var(--primary)}
 .call-btn:hover{transform:scale(1.08)}
+
+/* Study Room Video Grid */
+#roomMembers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  padding: 10px;
+  background: #0d0d0d;
+  flex: 1;
+  overflow-y: auto;
+  align-content: start;
+}
+.room-video-wrap {
+  position: relative;
+  background: #1a1a1a;
+  border-radius: 12px;
+  overflow: hidden;
+  aspect-ratio: 3/4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.room-video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0; left: 0;
+}
+.room-video-wrap .no-video {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary);
+  z-index: 0;
+}
+.room-video-wrap .v-name {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  background: rgba(0,0,0,.6);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 2;
+}
+.room-video-wrap video.is-local {
+  transform: scaleX(-1); /* Mirror local video */
+}
 
 /* Timer */
 .timer-display{font-family:'Courier New',monospace;font-size:64px;font-weight:800;text-align:center;margin:30px 0;letter-spacing:2px}
@@ -281,9 +330,7 @@ textarea.form-input{resize:vertical;min-height:90px}
   </div>
   <div class="form-group">
     <label>兴趣标签（多选，用于 AI 匹配）</label>
-    <div id="interestGrid" class="interest-grid">
-      <!-- Rendered by JS -->
-    </div>
+    <div id="interestGrid" class="interest-grid"></div>
     <div style="display:flex; gap:8px; margin-top:8px;">
       <input id="customInterestInput" class="form-input" style="flex:1" placeholder="自定义兴趣...">
       <button id="addCustomInterestBtn" class="icon-btn" style="padding:0 16px;">添加</button>
@@ -537,7 +584,7 @@ textarea.form-input{resize:vertical;min-height:90px}
   </div>
 </div>
 
-<!-- Call -->
+<!-- Call (1对1) -->
 <div class="modal" id="callModal">
   <div class="modal-content">
     <div class="video-stage">
@@ -554,7 +601,7 @@ textarea.form-input{resize:vertical;min-height:90px}
   </div>
 </div>
 
-<!-- Study Room -->
+<!-- Study Room (多人音视频) -->
 <div class="modal" id="roomModal">
   <div class="modal-content">
     <div class="chat-head" style="background:#1a1a1a;border-bottom:1px solid #333">
@@ -568,7 +615,8 @@ textarea.form-input{resize:vertical;min-height:90px}
         <button class="close-btn" data-close="roomModal" style="background:#333;color:#fff"><i class="fa-solid fa-xmark"></i></button>
       </div>
     </div>
-    <div style="flex:1;overflow-y:auto;padding:14px;background:#0d0d0d" id="roomMembers"></div>
+    <!-- 视频网格 -->
+    <div id="roomMembers"></div>
     <div class="chat-input" style="background:#1a1a1a;border-top:1px solid #333">
       <input id="roomMsg" type="text" placeholder="发言..." style="background:#222;color:#fff;border-color:#333">
       <button class="chat-btn send" id="roomSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
@@ -682,6 +730,12 @@ let timerRunning = false;
 let currentMusic = 'off';
 let musicAudio = null;
 
+// WebRTC
+const peerConnections = {}; // peerUid -> RTCPeerConnection
+const rtcConfig = {
+  iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }]
+};
+
 const PRESET_INTERESTS = ['考研','雅思','托福','教资','CPA','法考','编程','数学','英语','管理学','经济学','早起','阅读','冥想'];
 
 /* ============================================================
@@ -715,31 +769,13 @@ function todayStr() {
   return new Date().toISOString().split('T')[0];
 }
 
-/**
- * 智能城市标准化：将 KL / 吉隆坡 / 级龙破 / kuala lumpur 统一为 kuala lumpur
- * 这样即使打错字或输入缩写，也能匹配到同城的人！
- */
 function normalizeCity(city) {
   if (!city) return '未设置';
   const c = city.toLowerCase().trim().replace(/\s+/g, '');
-  
-  // 吉隆坡及其变体/错字
-  if (c.includes('kl') || c.includes('吉隆坡') || c.includes('kuala') || c.includes('级龙破') || c.includes('吉龙坡')) {
-    return 'kuala lumpur';
-  }
-  // 新加坡及其变体
-  if (c.includes('sg') || c.includes('新加坡') || c.includes('singapore')) {
-    return 'singapore';
-  }
-  // 北京及其变体
-  if (c.includes('bj') || c.includes('北京') || c.includes('beijing')) {
-    return 'beijing';
-  }
-  // 上海及其变体
-  if (c.includes('sh') || c.includes('上海') || c.includes('shanghai')) {
-    return 'shanghai';
-  }
-  // 如果用户输入了奇怪的内容，原样返回小写，让用户自己去修改
+  if (c.includes('kl') || c.includes('吉隆坡') || c.includes('kuala') || c.includes('级龙破') || c.includes('吉龙坡')) return 'kuala lumpur';
+  if (c.includes('sg') || c.includes('新加坡') || c.includes('singapore')) return 'singapore';
+  if (c.includes('bj') || c.includes('北京') || c.includes('beijing')) return 'beijing';
+  if (c.includes('sh') || c.includes('上海') || c.includes('shanghai')) return 'shanghai';
   return c;
 }
 
@@ -815,7 +851,7 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 /* ============================================================
-   5. INTEREST MANAGEMENT (Onboarding & Edit Profile)
+   5. INTEREST MANAGEMENT
 ============================================================ */
 let selectedInterests = [];
 
@@ -844,7 +880,6 @@ $('addCustomInterestBtn').onclick = () => {
   if (!val) return;
   if (selectedInterests.includes(val)) return toast('已存在该兴趣', 'error');
   selectedInterests.push(val);
-  // 添加到 UI
   const box = $('interestGrid');
   const chip = document.createElement('span');
   chip.className = 'interest-chip selected';
@@ -858,7 +893,6 @@ $('addCustomInterestBtn').onclick = () => {
   $('customInterestInput').value = '';
 };
 
-// Enter key for custom interest
 $('customInterestInput').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') $('addCustomInterestBtn').click();
 });
@@ -873,7 +907,7 @@ $('onDone').onclick = async () => {
   const profile = {
     uid: currentUser.uid, name, email: currentUser.email,
     photoURL: currentUser.photoURL || null, city: normalizedCity,
-    rawCity: rawCity, // 保留原始输入，方便用户编辑
+    rawCity: rawCity,
     interests: selectedInterests, onboarded: true,
     createdAt: serverTimestamp(), following: [], followers: [],
     stats: { views: 0, likes: 0 }
@@ -933,22 +967,16 @@ $('saveProfileBtn').onclick = async () => {
   if (editSelectedInterests.length < 1) return toast('请至少保留 1 个兴趣', 'error');
 
   const normalizedCity = normalizeCity(rawCity);
-  const updates = {
-    name,
-    city: normalizedCity,
-    rawCity: rawCity,
-    interests: editSelectedInterests
-  };
+  const updates = { name, city: normalizedCity, rawCity: rawCity, interests: editSelectedInterests };
 
   await updateDoc(doc(db, 'users', currentUser.uid), updates);
   userProfile = { ...userProfile, ...updates };
   closeModal('editProfileModal');
   toast('资料已更新', 'success');
   
-  // 刷新 UI
   $('profileName').textContent = userProfile.name;
   $('cityLabel').textContent = userProfile.rawCity || '未设置';
-  loadBuddies(); // refresh buddy list location text
+  loadBuddies();
 };
 
 /* ============================================================
@@ -1068,7 +1096,7 @@ async function loadDashboard() {
 }
 
 /* ============================================================
-   10. HABITS (增加/删除)
+   10. HABITS
 ============================================================ */
 async function loadHabits() {
   const q = query(collection(db, 'habits'), where('uid','==',currentUser.uid));
@@ -1304,7 +1332,7 @@ async function loadMyPosts() {
 }
 
 /* ============================================================
-   14. AI MATCHING (with Normalized Location)
+   14. AI MATCHING
 ============================================================ */
 async function runAIMatch() {
   toast('AI 正在分析你的兴趣标签...', 'info');
@@ -1313,13 +1341,13 @@ async function runAIMatch() {
   if (candidates.length === 0) return toast('暂无其他用户', 'error');
 
   const myInt = new Set(userProfile.interests||[]);
-  const myCityNormalized = userProfile.city; // already normalized on save
+  const myCityNormalized = userProfile.city;
 
   const scored = candidates.map(u => {
     const their = u.interests||[];
     const overlap = their.filter(i=>myInt.has(i)).length;
-    const sameCity = u.city === myCityNormalized; // exact match on normalized city
-    const score = overlap*2 + (sameCity?3:0); // Give higher weight to same city
+    const sameCity = u.city === myCityNormalized;
+    const score = overlap*2 + (sameCity?3:0);
     return {...u, score, overlap, sameCity};
   }).sort((a,b)=>b.score-a.score).slice(0,20);
 
@@ -1467,7 +1495,7 @@ $('chatText').addEventListener('keypress', e => { if (e.key==='Enter') $('chatSe
 $('startCallBtn').onclick = () => { startCall($('chatName').textContent); };
 
 /* ============================================================
-   17. CALLING
+   17. 1-ON-1 CALLING
 ============================================================ */
 async function startCall(name) {
   $('callName').textContent = name;
@@ -1476,7 +1504,7 @@ async function startCall(name) {
   try {
     localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     $('localVideo').srcObject = localStream;
-    $('remoteVideo').srcObject = localStream;
+    $('remoteVideo').srcObject = localStream; // Placeholder
     setTimeout(()=>$('callStatus').textContent = '通话中 00:00', 1200);
   } catch(e) {
     toast('无法访问摄像头/麦克风', 'error');
@@ -1522,7 +1550,7 @@ $('screenBtn').onclick = async function() {
 };
 
 /* ============================================================
-   18. STUDY ROOMS
+   18. STUDY ROOM (WEBRTC MULTI-USER)
 ============================================================ */
 async function loadRooms() {
   const q = query(collection(db,'study_rooms'), orderBy('createdAt','desc'), limit(30));
@@ -1579,48 +1607,212 @@ async function joinRoom(roomId) {
   if (!rSnap.exists()) return toast('房间不存在', 'error');
   const r = rSnap.data();
   myRoomRole = r.hostUid === currentUser.uid ? 'host' : 'guest';
+  
+  // 1. Update Firestore members list
   await updateDoc(doc(db,'study_rooms',roomId), { members: arrayUnion(currentUser.uid) });
 
+  // 2. UI Updates
   $('roomTitle').textContent = r.name;
   $('roomMeta').textContent = `${(r.members||[]).length} 人在线`;
   $('roomHostBtn').style.display = myRoomRole === 'host' ? 'flex' : 'none';
+  $('roomMembers').innerHTML = ''; // Clear previous
   openModal('roomModal');
 
-  try { localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true }); } catch(e) {}
+  // 3. Get Local Media
+  try {
+    localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    addLocalVideoToRoom();
+  } catch(e) {
+    console.warn('Camera/Mic blocked, continuing without local video.', e);
+    toast('未开启摄像头/麦克风，只显示头像', 'info');
+  }
 
+  // 4. Listen to Room Members (WebRTC signaling triggers here)
   if (activeRoomUnsub) activeRoomUnsub();
   activeRoomUnsub = onSnapshot(doc(db,'study_rooms',roomId), snap => {
     const room = snap.data(); if (!room) return;
     $('roomMeta').textContent = `${(room.members||[]).length} 人在线`;
-    renderRoomMembers(room.members || []);
+    const members = room.members || [];
+    
+    // Create offers to new members
+    members.forEach(uid => {
+      if (uid !== currentUser.uid && !peerConnections[uid]) {
+        createOffer(uid);
+      }
+    });
+
+    // Render member avatars / videos
+    renderRoomMembers(members);
+  });
+
+  // 5. Listen for Incoming Offers
+  onSnapshot(collection(db, `study_rooms/${roomId}/offers`), snap => {
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const data = change.doc.data();
+        if (data.to === currentUser.uid) {
+          handleOffer(data.from, data.offer);
+        }
+      }
+    });
+  });
+
+  // 6. Listen for Answers
+  onSnapshot(collection(db, `study_rooms/${roomId}/answers`), snap => {
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const data = change.doc.data();
+        if (data.to === currentUser.uid && peerConnections[data.from]) {
+          handleAnswer(data.from, data.answer);
+        }
+      }
+    });
+  });
+
+  // 7. Listen for ICE Candidates
+  onSnapshot(collection(db, `study_rooms/${roomId}/candidates`), snap => {
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const data = change.doc.data();
+        if (data.to === currentUser.uid && peerConnections[data.from]) {
+          peerConnections[data.from].addIceCandidate(new RTCIceCandidate(data.candidate));
+        }
+      }
+    });
   });
 }
 
+function addLocalVideoToRoom() {
+  const wrap = document.createElement('div');
+  wrap.className = 'room-video-wrap';
+  wrap.id = `video-wrap-${currentUser.uid}`;
+  wrap.innerHTML = `
+    <video id="video-${currentUser.uid}" autoplay playsinline muted class="is-local"></video>
+    <div class="v-name">我</div>
+  `;
+  $('roomMembers').appendChild(wrap);
+  const video = wrap.querySelector('video');
+  video.srcObject = localStream;
+}
+
 async function renderRoomMembers(uids) {
-  const box = $('roomMembers'); box.innerHTML = '';
-  for (const uid of uids) {
-    const s = await getDoc(doc(db,'users',uid));
-    if (!s.exists()) continue;
-    const u = s.data();
-    const isHost = (await getDoc(doc(db,'study_rooms',activeRoomId))).data().hostUid === uid;
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:#1a1a1a;margin-bottom:8px';
-    row.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:36px;height:36px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700">${u.name?.charAt(0)||'?'}</div>
-        <div><div style="font-size:13px;font-weight:600">${u.name}${isHost?' 👑':''}</div><div style="font-size:11px;color:#888">专注中</div></div>
-      </div>
-      ${myRoomRole==='host' && !isHost ? `<button class="icon-btn" data-kick="${uid}" style="background:#fff2f0;color:var(--danger)">踢出</button>` : ''}
-    `;
-    box.appendChild(row);
-    const k = row.querySelector('[data-kick]');
-    if (k) k.onclick = async () => {
-      if (confirm('踢出该成员？')) {
-        await updateDoc(doc(db,'study_rooms',activeRoomId), { members: arrayRemove(uid) });
-        toast('已踢出');
+  // Remove videos of users who left
+  Object.keys(peerConnections).forEach(uid => {
+    if (!uids.includes(uid)) {
+      const wrap = $(`video-wrap-${uid}`);
+      if (wrap) wrap.remove();
+      if (peerConnections[uid]) {
+        peerConnections[uid].close();
+        delete peerConnections[uid];
       }
-    };
+    }
+  });
+
+  for (const uid of uids) {
+    if (uid === currentUser.uid) continue;
+    if ($(`video-wrap-${uid}`)) continue; // Already rendered
+
+    const s = await getDoc(doc(db,'users',uid));
+    const u = s.exists() ? s.data() : { name: '用户' };
+    const isHost = (await getDoc(doc(db,'study_rooms',activeRoomId))).data().hostUid === uid;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'room-video-wrap';
+    wrap.id = `video-wrap-${uid}`;
+    wrap.innerHTML = `
+      <div class="no-video" id="no-video-${uid}">${u.name?.charAt(0) || '?'}</div>
+      <video id="video-${uid}" autoplay playsinline></video>
+      <div class="v-name">${u.name || '用户'}${isHost ? ' 👑' : ''}</div>
+    `;
+    $('roomMembers').appendChild(wrap);
+
+    // Host controls
+    if (myRoomRole === 'host' && !isHost) {
+      const kickBtn = document.createElement('button');
+      kickBtn.className = 'icon-btn';
+      kickBtn.style.cssText = 'position:absolute;top:4px;right:4px;background:#fff2f0;color:var(--danger);z-index:3;padding:2px 6px;font-size:10px;';
+      kickBtn.textContent = '踢出';
+      kickBtn.onclick = async () => {
+        if (confirm('踢出该成员？')) {
+          await updateDoc(doc(db,'study_rooms',activeRoomId), { members: arrayRemove(uid) });
+          toast('已踢出');
+        }
+      };
+      wrap.appendChild(kickBtn);
+    }
   }
+}
+
+/* WebRTC Signaling */
+async function createOffer(peerUid) {
+  const pc = new RTCPeerConnection(rtcConfig);
+  peerConnections[peerUid] = pc;
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  }
+
+  pc.onicecandidate = e => {
+    if (e.candidate) {
+      addDoc(collection(db, `study_rooms/${activeRoomId}/candidates`), {
+        from: currentUser.uid, to: peerUid, candidate: e.candidate.toJSON()
+      });
+    }
+  };
+
+  pc.ontrack = e => {
+    const video = $(`video-${peerUid}`);
+    if (video) {
+      video.srcObject = e.streams[0];
+      const noVideo = $(`no-video-${peerUid}`);
+      if (noVideo) noVideo.style.display = 'none';
+    }
+  };
+
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  await addDoc(collection(db, `study_rooms/${activeRoomId}/offers`), {
+    from: currentUser.uid, to: peerUid, offer: { sdp: offer.sdp, type: offer.type }
+  });
+}
+
+async function handleOffer(fromUid, offerData) {
+  const pc = new RTCPeerConnection(rtcConfig);
+  peerConnections[fromUid] = pc;
+
+  if (localStream) {
+    localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+  }
+
+  pc.onicecandidate = e => {
+    if (e.candidate) {
+      addDoc(collection(db, `study_rooms/${activeRoomId}/candidates`), {
+        from: currentUser.uid, to: fromUid, candidate: e.candidate.toJSON()
+      });
+    }
+  };
+
+  pc.ontrack = e => {
+    const video = $(`video-${fromUid}`);
+    if (video) {
+      video.srcObject = e.streams[0];
+      const noVideo = $(`no-video-${fromUid}`);
+      if (noVideo) noVideo.style.display = 'none';
+    }
+  };
+
+  await pc.setRemoteDescription(new RTCSessionDescription(offerData));
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  await addDoc(collection(db, `study_rooms/${activeRoomId}/answers`), {
+    from: currentUser.uid, to: fromUid, answer: { sdp: answer.sdp, type: answer.type }
+  });
+}
+
+async function handleAnswer(fromUid, answerData) {
+  const pc = peerConnections[fromUid];
+  if (!pc) return;
+  await pc.setRemoteDescription(new RTCSessionDescription(answerData));
 }
 
 $('roomSendBtn').onclick = async () => {
@@ -1654,28 +1846,82 @@ $('roomMuteBtn').onclick = function() {
   this.classList.toggle('active', !t.enabled);
   this.innerHTML = `<i class="fa-solid fa-${t.enabled?'microphone':'microphone-slash'}"></i>`;
 };
+
 $('roomVideoBtn').onclick = function() {
   if (!localStream) return;
   const t = localStream.getVideoTracks()[0]; if (!t) return;
   t.enabled = !t.enabled;
   this.classList.toggle('active', !t.enabled);
   this.innerHTML = `<i class="fa-solid fa-${t.enabled?'video':'video-slash'}"></i>`;
+  const localVideo = $(`video-${currentUser.uid}`);
+  if (localVideo) localVideo.style.opacity = t.enabled ? '1' : '0.2';
 };
+
 $('roomScreenBtn').onclick = async function() {
   try {
-    const s = await navigator.mediaDevices.getDisplayMedia({ video:true });
-    toast('屏幕共享已开启', 'success');
-    s.getVideoTracks()[0].onended = () => toast('共享结束', 'info');
-  } catch(e) { toast('无法共享', 'error'); }
+    if (screenStream) {
+      screenStream.getTracks().forEach(t=>t.stop());
+      screenStream = null;
+      // Revert back to camera
+      if (localStream) {
+        const videoTrack = localStream.getVideoTracks()[0];
+        replaceVideoTrack(videoTrack);
+        const localVideo = $(`video-${currentUser.uid}`);
+        if (localVideo) localVideo.srcObject = localStream;
+      }
+      this.classList.remove('active');
+      toast('已停止屏幕共享', 'info');
+    } else {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const screenTrack = screenStream.getVideoTracks()[0];
+      replaceVideoTrack(screenTrack);
+      
+      const localVideo = $(`video-${currentUser.uid}`);
+      if (localVideo) {
+        localVideo.srcObject = screenStream;
+        localVideo.classList.remove('is-local');
+      }
+      
+      this.classList.add('active');
+      toast('屏幕共享已开启', 'success');
+
+      screenTrack.onended = () => {
+        screenStream = null;
+        if (localStream) {
+          const vTrack = localStream.getVideoTracks()[0];
+          replaceVideoTrack(vTrack);
+          const lv = $(`video-${currentUser.uid}`);
+          if (lv) { lv.srcObject = localStream; lv.classList.add('is-local'); }
+        }
+        $('roomScreenBtn').classList.remove('active');
+        toast('共享结束', 'info');
+      };
+    }
+  } catch(e) { toast('无法共享屏幕', 'error'); }
 };
+
+function replaceVideoTrack(newTrack) {
+  Object.values(peerConnections).forEach(pc => {
+    const sender = pc.getSenders().find(s => s.track.kind === 'video');
+    if (sender && newTrack) sender.replaceTrack(newTrack);
+  });
+}
+
 $('roomHostBtn').onclick = () => toast('主持面板（可踢人/静音）', 'info');
 
 async function leaveRoom() {
   if (activeRoomId) {
     try { await updateDoc(doc(db,'study_rooms',activeRoomId), { members: arrayRemove(currentUser.uid) }); } catch(e) {}
+    // Clean up offers/answers/candidates for this room (optional, but good for cleanup)
   }
   if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; }
   if (localStream) { localStream.getTracks().forEach(t=>t.stop()); localStream = null; }
+  if (screenStream) { screenStream.getTracks().forEach(t=>t.stop()); screenStream = null; }
+  
+  Object.values(peerConnections).forEach(pc => pc.close());
+  Object.keys(peerConnections).forEach(k => delete peerConnections[k]);
+  
+  $('roomMembers').innerHTML = '';
   activeRoomId = null; myRoomRole = null;
   loadRooms();
 }
@@ -1799,7 +2045,7 @@ async function loadFollowingTab() {
 
 async function loadNearby() {
   const box = $('nearbyList'); box.innerHTML = '';
-  const myCityNormalized = userProfile.city; // already normalized
+  const myCityNormalized = userProfile.city;
   const q = query(collection(db,'users'), where('city','==',myCityNormalized), limit(30));
   const snap = await getDocs(q);
   const others = snap.docs.map(d=>d.data()).filter(u=>u.uid!==currentUser.uid);
@@ -1823,7 +2069,7 @@ async function loadNearby() {
   });
 }
 
-console.log('[Study Partner] App initialized — Profile edit & Smart Location Matching active.');
+console.log('[Study Partner] App initialized — WebRTC Study Room active.');
 </script>
 </body>
-         </html>
+                                                                                                                                             </html>
