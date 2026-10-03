@@ -1,1464 +1,256 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Study Partner - Enterprise Full Architecture (Part 1)</title>
-    <!-- FontAwesome 6.4.0 图标库 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* ==========================================================================
-           【模块一：超大体量企业级原生 CSS 设计与样式系统 (Part 1 样式)】
-           ========================================================================== */
-        :root {
-            --app-bg: #f7f4ed;
-            --card-bg: #ffffff;
-            --card-border: #eee8df;
-            --theme-orange: #ff8c00;
-            --theme-orange-hover: #e07b00;
-            --text-main: #333333;
-            --text-sub: #888888;
-            --text-light: #aaaaaa;
-            --danger-color: #ff4d4d;
-            --success-color: #52c41a;
-            --info-color: #1677ff;
-            --warning-color: #faad14;
-            --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.03);
-            --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
-            --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.15);
-            --radius-main: 26px;
-            --radius-card: 20px;
-            --radius-btn: 14px;
-            --transition-speed: 0.25s;
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--app-bg);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding-bottom: 96px;
-            user-select: none;
-            overflow-x: hidden;
-        }
-
-        /* 滚动条深度隐藏与定制 */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--app-bg); }
-        ::-webkit-scrollbar-thumb { background: #dcd6ce; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--theme-orange); }
-
-        /* 全局通用模态框遮罩系统 */
-        .modal-overlay-system {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(8px);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            opacity: 1;
-            transition: opacity var(--transition-speed) ease;
-        }
-        .modal-overlay-system.hidden {
-            display: none;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .modal-card-box {
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-main);
-            padding: 32px 24px;
-            width: 100%;
-            max-width: 380px;
-            text-align: center;
-            box-shadow: var(--shadow-modal);
-            transform: translateY(0);
-            transition: transform var(--transition-speed) ease;
-        }
-
-        /* 表单输入与按钮体系 */
-        .form-input-element {
-            width: 100%;
-            background-color: #faf9f6;
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-btn);
-            padding: 14px 16px;
-            font-size: 13px;
-            color: var(--text-main);
-            outline: none;
-            margin-bottom: 14px;
-            transition: border-color var(--transition-speed), background-color var(--transition-speed);
-        }
-        .form-input-element:focus {
-            border-color: var(--theme-orange);
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.1);
-        }
-
-        .btn-theme-solid {
-            width: 100%;
-            background-color: var(--theme-orange);
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 14px;
-            padding: 14px;
-            border: none;
-            border-radius: var(--radius-btn);
-            cursor: pointer;
-            transition: background-color var(--transition-speed), transform 0.1s ease;
-            box-shadow: 0 4px 14px rgba(255, 140, 0, 0.3);
-        }
-        .btn-theme-solid:hover { background-color: var(--theme-orange-hover); }
-        .btn-theme-solid:active { transform: scale(0.98); }
-
-        /* 顶部导航与标签栏体系 */
-        .app-header-bar {
-            position: sticky;
-            top: 0;
-            background-color: rgba(247, 244, 237, 0.94);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(238, 232, 223, 0.9);
-            z-index: 100;
-            padding: 12px 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-        }
-
-        .header-tabs-scroll {
-            display: flex;
-            gap: 20px;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-sub);
-            overflow-x: auto;
-            align-items: center;
-        }
-
-        .header-tab-btn {
-            background: none;
-            border: none;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-sub);
-            cursor: pointer;
-            padding-bottom: 4px;
-            white-space: nowrap;
-            transition: color var(--transition-speed);
-        }
-        .header-tab-btn.active {
-            color: var(--text-main);
-            font-weight: 700;
-            border-bottom: 2px solid var(--theme-orange);
-        }
-
-        /* 主体内容与面板切换体系 */
-        .app-content-wrapper {
-            flex: 1;
-            max-width: 440px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .main-section-panel {
-            display: none;
-            flex-direction: column;
-            gap: 16px;
-            animation: fadeInPanel 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .main-section-panel.active { display: flex; }
-
-        .sub-tab-panel {
-            display: none;
-            flex-direction: column;
-            gap: 16px;
-        }
-        .sub-tab-panel.active { display: flex; }
-
-        @keyframes fadeInPanel {
-            from { opacity: 0; transform: translateY(6px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* 核心卡片组件体系 */
-        .ui-card-container {
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-main);
-            padding: 20px;
-            box-shadow: var(--shadow-card);
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            transition: box-shadow var(--transition-speed);
-        }
-        .ui-card-container:hover { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08); }
-
-        .card-header-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-            border-bottom: 1px solid #f5f2eb;
-            padding-bottom: 10px;
-        }
-
-        .badge-tag-orange {
-            background-color: #fff3e0;
-            color: var(--theme-orange);
-            border: 1px solid #ffe0b2;
-            padding: 3px 10px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 11px;
-        }
-
-        /* 日期选择横向卡片 */
-        .date-picker-scroll {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-        .date-cell-card {
-            flex-shrink: 0;
-            width: 50px;
-            height: 68px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 18px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            color: var(--text-sub);
-            cursor: pointer;
-            transition: all var(--transition-speed);
-            box-shadow: var(--shadow-subtle);
-        }
-        .date-cell-card span:last-child {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-top: 2px;
-        }
-        .date-cell-card.active {
-            background-color: var(--theme-orange);
-            color: #ffffff;
-            border-color: var(--theme-orange);
-            box-shadow: 0 6px 16px rgba(255, 140, 0, 0.35);
-        }
-        .date-cell-card.active span:last-child { color: #ffffff; }
-
-        /* 底部导航栏与悬浮专注钮体系 */
-        .app-bottom-navigation {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background-color: var(--app-bg);
-            border-top: 1px solid rgba(238, 232, 223, 0.95);
-            max-width: 440px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            z-index: 1000;
-            box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.04);
-        }
-
-        .nav-item-btn {
-            background: none;
-            border: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            color: var(--text-sub);
-            cursor: pointer;
-            transition: color var(--transition-speed);
-        }
-        .nav-item-btn i { font-size: 17px; }
-        .nav-item-btn.active { color: var(--theme-orange); font-weight: 600; }
-
-        .floating-action-focus {
-            position: absolute;
-            top: -26px;
-            right: 24px;
-            width: 52px;
-            height: 52px;
-            background-color: var(--theme-orange);
-            color: #ffffff;
-            border-radius: 50%;
-            border: 3px solid var(--app-bg);
-            box-shadow: 0 8px 20px rgba(255, 140, 0, 0.45);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.15s ease, background-color var(--transition-speed);
-        }
-        .floating-action-focus:hover { background-color: var(--theme-orange-hover); }
-        .floating-action-focus:active { transform: scale(0.92); }
-    </style>
-</head>
-<body>
-
-    <!-- 1. Firebase 认证登录/注册弹窗 -->
-    <div id="auth-modal" class="modal-overlay-system">
-        <div class="modal-card-box">
-            <div style="width: 60px; height: 60px; background: #fff3e0; color: var(--theme-orange); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px;">
-                <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-            <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">学习搭子云端登录</h2>
-            <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 20px;">安全同步您的 Firebase 专注数据与社交圈</p>
-            <div id="auth-error-alert" style="background: #fff2f0; border: 1px solid #ffccc7; color: var(--danger-color); font-size: 11px; padding: 10px; border-radius: 10px; margin-bottom: 14px; display: none;"></div>
-            <input type="email" id="auth-email-input" placeholder="请输入您的 Gmail / 邮箱" class="form-input-element">
-            <input type="password" id="auth-password-input" placeholder="请输入密码 (不少于6位)" class="form-input-element">
-            <button onclick="executeFirebaseAuthentication()" class="btn-theme-solid">立即登录 / 注册</button>
-        </div>
-    </div>
-
-    <!-- 2. 番茄钟专注计时器与白噪音浮窗 -->
-    <div id="timer-modal" class="modal-overlay-system hidden">
-        <div class="modal-card-box">
-            <div style="font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;">专注自习进行中</div>
-            <div id="timer-display-clock" style="font-family: monospace; font-size: 56px; font-weight: 800; color: var(--text-main); margin-bottom: 24px;">25:00</div>
-            <div style="display: flex; gap: 10px; margin-bottom: 12px;">
-                <button onclick="toggleAudioWhiteNoise()" id="noise-toggle-btn" style="flex: 1; background: #faf9f6; border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; font-size: 11px; cursor: pointer; font-weight: 600;">🎵 白噪音：关</button>
-                <button onclick="pauseFocusTimer()" style="flex: 1; background: #faf9f6; border: 1px solid var(--card-border); padding: 12px; border-radius: 12px; font-size: 11px; cursor: pointer; font-weight: 600;">暂停</button>
-            </div>
-            <button onclick="stopAndLogFocusTimer()" style="width: 100%; background: var(--danger-color); color: #fff; padding: 14px; border-radius: 14px; border: none; font-weight: 600; cursor: pointer;">结束并打卡同步</button>
-        </div>
-    </div>
-
-    <!-- 3. 新建阶段目标 OKR 弹窗 -->
-    <div id="okr-modal" class="modal-overlay-system hidden">
-        <div class="modal-card-box" style="text-align: left;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <h3 style="font-size: 15px; font-weight: 700;">新建阶段目标 (OKR)</h3>
-                <button onclick="closeOkrModal()" style="background:none; border:none; cursor:pointer; font-size: 16px; color: var(--text-sub);"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <input type="text" id="okr-title-field" placeholder="输入 Objective 核心目标..." class="form-input-element">
-            <input type="date" id="okr-date-field" class="form-input-element">
-            <button onclick="saveNewOkrTarget()" class="btn-theme-solid">保存并同步目标</button>
-        </div>
-    </div>
-
-    <!-- 4. 操场广场发动态弹窗 -->
-    <div id="post-modal" class="modal-overlay-system hidden">
-        <div class="modal-card-box" style="text-align: left;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-                <h3 style="font-size: 15px; font-weight: 700;">发布新想法 / 碎碎念</h3>
-                <button onclick="closePostModal()" style="background:none; border:none; cursor:pointer; font-size: 16px; color: var(--text-sub);"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <textarea id="post-textarea-content" rows="4" placeholder="今天有什么学习心得或碎碎念？..." class="form-input-element" style="resize: none;"></textarea>
-            <button onclick="publishSquarePost()" class="btn-theme-solid">发布动态</button>
-        </div>
-    </div>
-
-    <!-- 5. 实时私聊互动聊天面板弹窗 -->
-    <div id="chat-modal" class="modal-overlay-system hidden">
-        <div class="modal-card-box" style="text-align: left; height: 400px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 10px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <div style="width: 32px; height: 32px; background: var(--theme-orange); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px;">岁</div>
-                    <div><div id="chat-target-username" style="font-weight: 700; font-size: 12px;">岁晏</div><div style="font-size: 9px; color: var(--success-color);">在线 • 正在自习</div></div>
-                </div>
-                <button onclick="closeChatModal()" style="background:none; border:none; cursor:pointer; font-size: 16px; color: var(--text-sub);"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div id="chat-message-scroll-area" style="flex: 1; overflow-y: auto; padding: 10px 0; display: flex; flex-direction: column; gap: 8px; font-size: 11px;">
-                <div style="background: #f0eee6; padding: 8px 12px; border-radius: 10px; max-width: 80%; align-self: flex-start;">一起加油冲教资考试！</div>
-            </div>
-            <div style="display: flex; gap: 8px; border-top: 1px solid var(--card-border); padding-top: 10px;">
-                <input type="text" id="chat-input-text-field" placeholder="发送私聊消息..." class="form-input-element" style="margin: 0; flex: 1;">
-                <button onclick="sendChatMessageAction()" style="background: var(--theme-orange); color: #fff; border: none; padding: 0 14px; border-radius: 14px; font-weight: 600; cursor: pointer; font-size: 12px;">发送</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 顶部导航栏 -->
-    <header class="app-header-bar">
-        <div id="header-top-nav-container" class="header-tabs-scroll no-scrollbar"></div>
-        <div style="display: flex; align-items: center; gap: 8px; padding-left: 6px;">
-            <span id="current-user-email-label" style="font-size: 10px; color: var(--text-light); max-width: 75px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
-            <button onclick="signOutUserAccount()" style="background:none; border:none; color: var(--text-sub); cursor:pointer; font-size: 12px;" title="退出登录"><i class="fa-solid fa-arrow-right-from-bracket"></i></button>
-        </div>
-    </header>
-
-    <main class="app-content-wrapper">
-        <!-- 1. 学习面板区域 -->
-        <div id="panel-section-study" class="main-section-panel active">
-            <div id="subtab-kanban" class="sub-tab-panel active">
-                <div style="background: rgba(255,255,255,0.75); border: 1px solid var(--card-border); border-radius: var(--radius-card); padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-                    <span>总计专注 <strong style="color:var(--text-main);">63.5时</strong></span>
-                    <span>连续 <strong style="color:var(--text-main);">未使用</strong></span>
-                    <button onclick="toggleMonthlyAnalyticsView()" style="background: none; border: none; color: var(--theme-orange); cursor: pointer; font-weight: 700;">切换月报</button>
-                </div>
-                <div class="date-picker-scroll no-scrollbar">
-                    <div onclick="selectDateCard(13, this)" class="date-cell-card active"><span>一</span><span>13</span></div>
-                    <div onclick="selectDateCard(14, this)" class="date-cell-card"><span>二</span><span>14</span></div>
-                    <div onclick="selectDateCard(15, this)" class="date-cell-card"><span>三</span><span>15</span></div>
-                    <div onclick="selectDateCard(16, this)" class="date-cell-card" style="background: #f0f7ff; color: #1677ff; border-color: #bae0ff;"><span>四</span><span>16</span></div>
-                    <div onclick="selectDateCard(17, this)" class="date-cell-card"><span>五</span><span>17</span></div>
-                    <div onclick="selectDateCard(18, this)" class="date-cell-card"><span>六</span><span>18</span></div>
-                </div>
-                <div class="ui-card-container">
-                    <div class="card-header-flex"><span style="font-weight: 700;"><i class="fa-solid fa-chart-pie" style="color:var(--theme-orange);"></i> 日活动：<span id="display-day-focus-time">7时40分</span></span></div>
-                    <div id="analytics-dynamic-box" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; color: var(--text-sub);">
-                        <div style="display: flex; justify-content: space-between;"><span>管理学背诵</span><strong style="color:var(--text-main);">2时45分</strong></div>
-                        <div style="display: flex; justify-content: space-between;"><span>经济学</span><strong style="color:var(--text-main);">2时10分</strong></div>
-                    </div>
-                </div>
-            </div>
-            <!-- （Part 1 结束，紧接着发送 Part 2） -->
-            <!-- 日计划 Tab -->
-            <div id="subtab-daily-plan" class="sub-tab-panel">
-                <div class="ui-card-container">
-                    <div class="card-header-flex">
-                        <span style="color: var(--text-sub);">今天 07.20</span>
-                        <span class="badge-tag-orange">搭友可见</span>
-                    </div>
-                    <p style="font-size: 12px; color: var(--text-sub);">第二天的计划在这里便捷制定</p>
-                    <div style="border: 2px dashed var(--card-border); padding: 24px; border-radius: 16px; text-align: center; color: var(--text-light); font-size: 12px; background: #faf9f6;">
-                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: #dcd6ce; margin-bottom: 6px;"></i>
-                        <div>完成证明图片区</div>
-                    </div>
-                    <button class="btn-theme-solid" style="padding: 12px; font-size: 12px;">提交计划总结</button>
-                </div>
-            </div>
-
-            <!-- 目标 OKR Tab -->
-            <div id="subtab-okr" class="sub-tab-panel">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 12px; font-weight: 600; color: var(--text-sub);">长效目标与核心关键结果</span>
-                    <span class="badge-tag-orange" style="cursor:pointer;">+ 新建目标</span>
-                </div>
-                <div class="ui-card-container">
-                    <div class="card-header-flex">
-                        <span style="font-size: 11px; color: var(--text-sub);">📅 2027.01.01 截止，还剩 166 天</span>
-                        <span class="badge-tag-orange">搭友可见</span>
-                    </div>
-                    <div style="font-size: 13px; font-weight: 700;">阶段目标与核心考点突破</div>
-                    <div style="width: 100%; background: #f0eee6; height: 8px; border-radius: 4px; overflow: hidden;">
-                        <div style="background: var(--theme-orange); width: 66%; height: 100%;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 小习惯 Tab -->
-            <div id="subtab-habit" class="sub-tab-panel">
-                <div class="ui-card-container" style="font-size: 12px;">
-                    <div style="font-weight: 700; color: var(--text-sub); margin-bottom: 6px;">▼ 起床</div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f5f2eb;">
-                        <span>早起 (0/1 每天)</span>
-                        <button class="badge-tag-orange" style="border:none; cursor:pointer; padding: 6px 12px;">打卡</button>
-                    </div>
-                    <div style="font-weight: 700; color: var(--text-sub); margin-top: 10px; margin-bottom: 6px;">▼ 晚上</div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0;">
-                        <span>散步 (19:30提醒)</span>
-                        <button class="badge-tag-orange" style="border:none; cursor:pointer; padding: 6px 12px;">打卡</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 2. 搭友区域面板 -->
-        <div id="panel-section-social" class="main-section-panel">
-            <div class="ui-card-container" style="flex-direction: row; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--card-border);">
-                    <div><div style="font-weight: 700; font-size: 13px;">岁晏</div><div style="font-size: 11px; color: var(--theme-orange); margin-top: 2px;">正在专注「教资」</div></div>
-                </div>
-                <button class="badge-tag-orange" style="border:none; cursor:pointer; padding: 8px 14px; font-size: 11px;">私聊互动</button>
-            </div>
-        </div>
-
-        <!-- 3. 发现/操场区域面板 -->
-        <div id="panel-section-square" class="main-section-panel">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 13px; font-weight: 700;">广场动态社区</span>
-                <span class="badge-tag-orange" style="cursor:pointer; padding: 6px 12px;">+ 发动态</span>
-            </div>
-            <div class="ui-card-container" id="square-dynamic-feed-container">
-                <div class="card-header-row"><span style="color: var(--text-sub);">周一 07.20</span><span class="badge-tag-orange">公开</span></div>
-                <div style="background: #fff8f0; padding: 12px; border-radius: 14px; font-size: 12px; border: 1px solid #ffe0b2;">今天把睡眠状态调整过来了，太不容易了 🥲</div>
-                <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-sub);">
-                    <button style="background:none; border:none; cursor:pointer; color:inherit;"><i class="fa-regular fa-thumbs-up"></i> 点赞 (<span>3</span>)</button>
-                    <span><i class="fa-regular fa-comment"></i> 评论 (2)</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. 我的（个人主页）区域面板 -->
-        <div id="panel-section-profile" class="main-section-panel">
-            <div class="ui-card-container">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <div style="width: 52px; height: 52px; border-radius: 50%; background: #ffe0b2; color: var(--theme-orange); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; border: 2px solid #ffcc80;">初</div>
-                    <div>
-                        <div style="font-weight: 700; font-size: 14px;">1. 初级学员</div>
-                        <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px; font-style: italic;">“想，全的问题；做，都是答案”</div>
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(5, 1fr); text-align: center; font-size: 11px; color: var(--text-sub); border-top: 1px solid #f5f2eb; padding-top: 12px;">
-                    <div><div style="font-weight: 700; font-size: 14px; color: var(--text-main);">2</div>关注</div>
-                    <div><div style="font-weight: 700; font-size: 14px; color: var(--text-main);">1</div>粉丝</div>
-                    <div><div style="font-weight: 700; font-size: 14px; color: var(--text-main);">8</div>看过我</div>
-                    <div><div style="font-weight: 700; font-size: 14px; color: var(--text-main);">7</div>我看过</div>
-                    <div><div style="font-weight: 700; font-size: 14px; color: var(--text-main);">0</div>我的赞</div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- 底部主导航栏 -->
-    <nav class="app-bottom-navigation">
-        <button class="nav-item-btn active"><i class="fa-solid fa-graduation-cap"></i><span>学习</span></button>
-        <button class="nav-item-btn"><i class="fa-solid fa-user-group"></i><span>搭友</span></button>
-        <button class="nav-item-btn"><i class="fa-solid fa-compass"></i><span>发现</span></button>
-        <button class="nav-item-btn"><i class="fa-solid fa-user"></i><span>我的</span></button>
-        <div class="floating-action-focus"><i class="fa-solid fa-play"></i><span>专注</span></div>
-    </nav>
-
-    <!-- 扩展样式区（纯 CSS 补充，无 JavaScript） -->
-    <style>
-        /* 扩展大量高阶精细化修饰 CSS 类，确保整体样式厚度与专业度拉满 */
-        .ext-container-fluid { width: 100%; padding: 0 12px; box-sizing: border-box; }
-        .ext-flex-center { display: flex; align-items: center; justify-content: center; }
-        .ext-flex-between { display: flex; align-items: center; justify-content: space-between; }
-        .ext-text-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .ext-badge-green { background: #f6ffed; color: var(--success-color); border: 1px solid #b7eb8f; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
-        .ext-badge-blue { background: #e6f4ff; color: var(--info-color); border: 1px solid #91caff; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
-        .ext-badge-red { background: #fff2f0; color: var(--danger-color); border: 1px solid #ffccc7; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 600; }
-        .ext-shadow-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-        .ext-shadow-hover:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
-        .ext-divider-dashed { width: 100%; border-top: 1px dashed var(--card-border); margin: 8px 0; }
-        .ext-glass-pane { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(238, 232, 223, 0.9); }
-    </style>
-</body>
-</html><!-- ==========================================================================
-     【Part 3 终极庞大体量：核心 HTML 结构扩展与 800+ 行高级 CSS 样式库】
-     ========================================================================== -->
-
-<!-- 扩展高阶组件容器库：超大体量 HTML 骨架段落 -->
-<div class="enterprise-layout-container" style="display:none;">
-    <!-- 附加超大型数据展示矩阵面板 -->
-    <div class="matrix-grid-dashboard">
-        <div class="matrix-card-item">
-            <div class="matrix-card-title">今日专注时长统计</div>
-            <div class="matrix-card-value">7.65 小时</div>
-            <div class="matrix-card-trend positive">↑ 环比上周增长 12.4%</div>
-        </div>
-        <div class="matrix-card-item">
-            <div class="matrix-card-title">当前连续打卡天数</div>
-            <div class="matrix-card-value">19 天</div>
-            <div class="matrix-card-trend positive">🔥 状态极佳</div>
-        </div>
-        <div class="matrix-card-item">
-            <div class="matrix-card-title">搭友互动总频次</div>
-            <div class="matrix-card-value">142 次</div>
-            <div class="matrix-card-trend neutral">互助协同中</div>
-        </div>
-        <div class="matrix-card-item">
-            <div class="matrix-card-title">目标完成度百分比</div>
-            <div class="matrix-card-value">68.5%</div>
-            <div class="matrix-card-trend positive">稳步推进中</div>
-        </div>
-    </div>
-</div>
-
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>学习搭子</title>
 <style>
-/* ==========================================================================
-   【800+ 行高级精细 CSS 样式系统全量注入 - 极致厚度版】
-   ========================================================================== */
-
-/* 1. 基础重置与全局滚动条深度渲染 */
-*, ::after, ::before {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    font-style: normal;
-    text-decoration: none;
-}
-
-html {
-    font-size: 16px;
-    scroll-behavior: smooth;
-    -webkit-text-size-adjust: 100%;
-}
-
-body {
-    background-color: var(--app-bg, #f7f4ed);
-    color: var(--text-main, #333333);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    line-height: 1.5;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-}
-
-/* 2. 企业级网格排版系统 */
-.enterprise-layout-container {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 16px;
-}
-
-.matrix-grid-dashboard {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin: 20px 0;
-}
-
-.matrix-card-item {
-    background: var(--card-bg, #ffffff);
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 20px;
-    padding: 20px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.matrix-card-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
-}
-
-.matrix-card-title {
-    font-size: 12px;
-    color: var(--text-sub, #888888);
-    font-weight: 500;
-}
-
-.matrix-card-value {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--text-main, #333333);
-}
-
-.matrix-card-trend {
-    font-size: 11px;
-    font-weight: 600;
-}
-
-.matrix-card-trend.positive { color: #52c41a; }
-.matrix-card-trend.neutral { color: #1677ff; }
-.matrix-card-trend.negative { color: #ff4d4d; }
-
-/* 3. 深度定制表单与高阶交互控件库 */
-.ui-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 16px;
-    width: 100%;
-}
-
-.ui-form-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-main, #333333);
-    text-align: left;
-}
-
-.ui-input-control {
-    width: 100%;
-    background-color: #faf9f6;
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 14px;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: var(--text-main, #333333);
-    outline: none;
-    transition: all 0.2s ease;
-}
-
-.ui-input-control:hover {
-    border-color: #dcd6ce;
-}
-
-.ui-input-control:focus {
-    border-color: var(--theme-orange, #ff8c00);
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.12);
-}
-
-/* 4. 高级按钮与徽章修饰系列 */
-.ui-btn-base {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 20px;
-    font-size: 13px;
-    font-weight: 600;
-    border-radius: 14px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-    outline: none;
-}
-
-.ui-btn-primary {
-    background-color: var(--theme-orange, #ff8c00);
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(255, 140, 0, 0.3);
-}
-
-.ui-btn-primary:hover {
-    background-color: #e07b00;
-    box-shadow: 0 6px 18px rgba(255, 140, 0, 0.4);
-}
-
-.ui-btn-primary:active {
-    transform: scale(0.98);
-}
-
-.ui-btn-secondary {
-    background-color: #faf9f6;
-    color: var(--text-main, #333333);
-    border: 1px solid var(--card-border, #eee8df);
-}
-
-.ui-btn-secondary:hover {
-    background-color: #f0eee6;
-}
-
-/* 5. 提示、标签与通知气泡特效类群 */
-.ui-badge-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    border-radius: 10px;
-}
-
-.ui-badge-pill.orange {
-    background-color: #fff3e0;
-    color: var(--theme-orange, #ff8c00);
-    border: 1px solid #ffe0b2;
-}
-
-.ui-badge-pill.green {
-    background-color: #f6ffed;
-    color: #52c41a;
-    border: 1px solid #b7eb8f;
-}
-
-.ui-badge-pill.blue {
-    background-color: #e6f4ff;
-    color: #1677ff;
-    border: 1px solid #91caff;
-}
-
-.ui-badge-pill.red {
-    background-color: #fff2f0;
-    color: #ff4d4d;
-    border: 1px solid #ffccc7;
-}
-
-/* 6. 高阶布局修饰与微光动画效果 */
-@keyframes shimmerWave {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-}
-
-.ui-skeleton-loader {
-    background: linear-gradient(90deg, #f0eee6 25%, #faf9f6 50%, #f0eee6 75%);
-    background-size: 200% 100%;
-    animation: shimmerWave 1.8s infinite;
-    border-radius: 12px;
-}
-
-.ui-glassmorphism-panel {
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(238, 232, 223, 0.9);
-}
-
-/* 7. 响应式布局与断点微调补充 (多达数十行媒体查询修饰) */
-@media screen and (max-width: 480px) {
-    .matrix-grid-dashboard {
-        grid-template-columns: 1fr;
-    }
-    .ui-card-container {
-        padding: 16px;
-        border-radius: 20px;
-    }
-}
-
-@media screen and (min-width: 768px) {
-    .app-content-wrapper {
-        max-width: 520px;
-    }
-}
-
-/* 8. 尾部海量补充修饰类（确保样式体量极其饱满厚实） */
-.ext-utility-flex-col { display: flex; flex-direction: column; gap: 12px; width: 100%; }
-.ext-utility-flex-row { display: flex; align-items: center; justify-content: space-between; width: 100%; }
-.ext-utility-text-bold { font-weight: 700; color: var(--text-main, #333333); }
-.ext-utility-text-muted { font-size: 11px; color: var(--text-sub, #888888); }
-.ext-utility-divider { width: 100%; height: 1px; background-color: var(--card-border, #eee8df); margin: 6px 0; }
-.ext-utility-spacer { flex: 1; }
-.ext-utility-radius-full { border-radius: 9999px; }
-.ext-utility-cursor-pointer { cursor: pointer; }
-.ext-utility-transition-all { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+:root{--bg:#f7f4ed;--card:#fff;--bd:#eee8df;--or:#ff8c00;--tx:#333;--sub:#888;--ok:#52c41a;--bad:#ff4d4d}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1e1c19;--card:#2a2723;--bd:#3a362f;--tx:#eee;--sub:#aaa}}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{background:var(--bg);color:var(--tx);font-family:-apple-system,"Segoe UI",Roboto,sans-serif}
+body{min-height:100vh;padding-top:env(safe-area-inset-top,0);padding-bottom:calc(90px + env(safe-area-inset-bottom,0))}
+button{font:inherit;cursor:pointer;color:inherit}
+.wrap{max-width:440px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:22px;padding:16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 6px 18px rgba(0,0,0,.05)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.sub{color:var(--sub);font-size:12px}
+.tabs{display:flex;gap:18px;overflow-x:auto;padding:6px 14px;max-width:440px;margin:0 auto;position:sticky;top:env(safe-area-inset-top,0);background:var(--bg);z-index:5}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:6px 0;color:var(--sub);white-space:nowrap;font-size:14px}
+.tabs button.on{color:var(--tx);font-weight:700;border-color:var(--or)}
+.btn{background:var(--or);color:#fff;border:0;border-radius:14px;padding:12px;font-weight:600;width:100%}
+.btn.g{background:var(--bg);color:var(--tx);border:1px solid var(--bd)}
+.tag{background:#fff3e0;color:var(--or);border:1px solid #ffe0b2;border-radius:10px;padding:4px 10px;font-size:11px;font-weight:600}
+input,textarea{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:12px;font:inherit;font-size:14px;outline:none}
+input:focus,textarea:focus{border-color:var(--or)}
+.dates{display:flex;gap:8px;overflow-x:auto}
+.d{flex:0 0 50px;height:66px;border-radius:18px;border:1px solid var(--bd);background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;color:var(--sub)}
+.d b{font-size:15px;color:var(--tx)}.d.on{background:var(--or);border-color:var(--or);color:#fff}.d.on b{color:#fff}
+.bar{height:8px;background:var(--bd);border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--or)}
+nav{position:fixed;left:0;right:0;bottom:0;max-width:440px;margin:0 auto;background:var(--bg);border-top:1px solid var(--bd);display:flex;justify-content:space-around;padding:8px 0 calc(8px + env(safe-area-inset-bottom,0));z-index:10}
+nav button{background:none;border:0;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--sub)}
+nav button span{font-size:19px}nav button.on{color:var(--or);font-weight:700}
+.fab{position:fixed;right:max(16px,calc(50% - 204px));bottom:calc(76px + env(safe-area-inset-bottom,0));width:54px;height:54px;border-radius:50%;background:var(--or);color:#fff;border:3px solid var(--bg);font-size:11px;font-weight:700;z-index:11;box-shadow:0 8px 20px rgba(255,140,0,.45)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.modal.h{display:none}
+.box{background:var(--card);border-radius:24px;padding:24px;width:100%;max-width:360px;display:flex;flex-direction:column;gap:12px}
+.clock{font:800 54px monospace;text-align:center}
+.msg{padding:8px 12px;border-radius:12px;max-width:80%;font-size:13px;background:var(--bg)}.msg.me{align-self:flex-end;background:var(--or);color:#fff}
+.panel{display:none;flex-direction:column;gap:14px}.panel.on{display:flex}
+.av{width:42px;height:42px;border-radius:50%;background:#ffe0b2;color:var(--or);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+.hero{background:radial-gradient(circle at 20% 30%,#86b072 0,transparent 40%),radial-gradient(circle at 80% 65%,#5a874b 0,transparent 45%),#6f9a5e;color:#fff;padding:calc(18px + env(safe-area-inset-top,0)) 16px 16px;margin:-14px -14px 0;display:flex;flex-direction:column;gap:12px}
+.hero .st{display:flex;text-align:center}.hero .st div{flex:1;font-size:11px;opacity:.9}.hero .st b{display:block;font-size:20px}
+.hero .chip{background:rgba(255,255,255,.22);border-radius:14px;padding:4px 12px;font-size:12px;border:0;color:#fff}
+.vip{background:#3b3a36;color:#f5deb3;margin:0 -14px;padding:14px 16px;display:flex;justify-content:space-between;font-size:14px}
+.cats{display:flex;gap:16px;overflow-x:auto;padding:4px 0}.cats button{background:none;border:0;border-bottom:2px solid transparent;color:var(--sub);white-space:nowrap;padding-bottom:4px;font-size:14px;text-align:center}
+.cats button small{display:block;font-size:10px}.cats button.on{color:var(--or);border-color:var(--or);font-weight:700}
+.tl{display:flex;gap:10px}.tl .dt{width:44px;flex:none;font-size:12px;font-weight:600}.tl .dt small{display:block;color:var(--sub);font-weight:400;font-size:10px}
+.bub{background:#c9b8f5;color:#333;border-radius:18px;padding:10px 14px;font-size:14px;align-self:flex-start}
+select{width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:14px;padding:12px;font:inherit;font-size:14px}
 </style>
-<!-- ==========================================================================
-     【Part 4 终极扩充：海量高级 HTML 结构矩阵与 800+ 行企业级 CSS 原子样式库】
-     ========================================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-auth-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database-compat.js"></script>
+</head><body>
 
-<!-- 超大型高级数据看板与组件模版矩阵 (HTML 骨架延伸) -->
-<div class="enterprise-extended-architecture" style="display: none;">
-    
-    <!-- 1. 深度数据分析图表网格组件 -->
-    <div class="analytics-deep-grid-wrapper">
-        <div class="analytics-card-pane">
-            <div class="pane-header-row">
-                <span class="pane-title-text"><i class="fa-solid fa-chart-line"></i> 周专注效率趋势分析</span>
-                <span class="ui-badge-pill orange">实时同步</span>
-            </div>
-            <div class="chart-bars-container">
-                <div class="bar-column"><div class="bar-fill" style="height: 60%;"></div><span>周一</span></div>
-                <div class="bar-column"><div class="bar-fill" style="height: 85%;"></div><span>周二</span></div>
-                <div class="bar-column"><div class="bar-fill" style="height: 45%;"></div><span>周三</span></div>
-                <div class="bar-column"><div class="bar-fill" style="height: 90%;"></div><span>周四</span></div>
-                <div class="bar-column"><div class="bar-fill" style="height: 75%;"></div><span>周五</span></div>
-                <div class="bar-column"><div class="bar-fill" style="height: 95%;"></div><span>周六</span></div>
-                <div class="bar-column"><div class="bar-fill" style="height: 80%;"></div><span>周日</span></div>
-            </div>
-        </div>
-    </div>
+<div id="auth" class="modal"><div class="box">
+<h2 style="text-align:center">🎓 学习搭子</h2>
+<button class="btn g" onclick="gLogin()">🔵 使用 Google 登录</button>
+<div class="sub" style="text-align:center">— 或使用邮箱密码 —</div>
+<input id="em" type="email" placeholder="邮箱"><input id="pw" type="password" placeholder="密码（至少6位）"><input id="nm" placeholder="昵称（注册时填写）">
+<div id="ae" class="sub" style="color:var(--bad)"></div>
+<button class="btn" onclick="emailAuth(false)">登录</button><button class="btn g" onclick="emailAuth(true)">注册新账号</button>
+<button class="btn g" onclick="resetPw()">忘记密码</button></div></div>
 
-    <!-- 2. 高阶习惯打卡日历矩阵组件 -->
-    <div class="habit-calendar-matrix-card">
-        <div class="pane-header-row">
-            <span class="pane-title-text"><i class="fa-solid fa-calendar-check"></i> 10月习惯坚持矩阵</span>
-            <span class="ui-badge-pill green">已连续 19 天</span>
-        </div>
-        <div class="calendar-grid-cells">
-            <div class="cal-cell completed">1</div><div class="cal-cell completed">2</div><div class="cal-cell completed">3</div>
-            <div class="cal-cell active-today">4</div><div class="cal-cell">5</div><div class="cal-cell">6</div>
-            <div class="cal-cell">7</div><div class="cal-cell">8</div><div class="cal-cell">9</div>
-        </div>
-    </div>
+<div id="timer" class="modal h"><div class="box">
+<div class="sub" style="text-align:center">专注自习中</div>
+<div id="clk" class="clock">25:00</div>
+<input id="subj" placeholder="学习科目，如：经济学">
+<div class="row"><button class="btn g" id="pz" onclick="pauseT()">暂停</button><button class="btn g" onclick="setMin()">改时长</button><button class="btn g" id="nz" onclick="noise()">🎵 白噪音：关</button></div>
+<button class="btn" style="background:var(--bad)" onclick="endT()">结束并打卡</button>
+<button class="btn g" onclick="cancelT()">放弃</button></div></div>
 
-</div>
+<div id="form" class="modal h"><div class="box">
+<h3 id="ft"></h3><input id="f1"><input id="f2" type="date" style="display:none"><select id="f3" style="display:none"><option>碎碎念</option><option>树洞</option><option>待办</option><option>搭友分享</option><option>向全世界叽叽喳喳</option></select>
+<div class="row"><button class="btn g" onclick="$('form').classList.add('h')">取消</button><button class="btn" onclick="submitForm()">保存</button></div></div></div>
 
-<style>
-/* ==========================================================================
-   【800+ 行高级精细原子 CSS 样式库全量扩展 - Part 4 终极版】
-   ========================================================================== */
+<div id="chat" class="modal h"><div class="box" style="height:420px">
+<div class="row"><b id="cn"></b><button class="btn g" style="width:auto;padding:6px 12px" onclick="closeChat()">✕</button><button class="btn g" style="width:auto;padding:6px 12px" onclick="cam()">📹</button></div><video id="lv" autoplay muted playsinline style="display:none;width:100%;max-height:120px;border-radius:12px;background:#000"></video>
+<div id="cm" style="flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px"></div>
+<div class="row"><input id="ci" placeholder="发消息…" onkeydown="if(event.key==='Enter')sendC()"><button class="btn" style="width:70px" onclick="sendC()">发送</button></div></div></div>
 
-/* 1. 深度图表与矩阵面板布局样式 */
-.enterprise-extended-architecture {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 12px;
+<div id="top" class="tabs"></div>
+<main class="wrap" id="main"></main>
+<button class="fab" id="fab" onclick="fabClick()">▶<br>专注</button>
+<nav id="nav"></nav>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const K='studybuddy_v1';
+let S={user:null,logs:[],habits:[{n:'早起',c:'起床',done:{}},{n:'散步',c:'晚上',done:{}}],okrs:[],plans:{},posts:[
+{id:1,a:'岁晏',t:'今天把睡眠状态调整过来了，太不容易了 🥲',likes:3,liked:false,d:'示例'}],chats:{},following:{}};
+try{const r=localStorage.getItem(K);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}};
+const PEERS=[{n:'岁晏',f:'教资',r:'96%'},{n:'Alex',f:'数学与物理',r:'91%'},{n:'Chloe',f:'写作',r:'88%'},{n:'Ethan',f:'Python',r:'85%'}];
+const REPLY=['加油！一起冲 💪','我也在学，等会儿打卡～','今天番茄钟完成几个了？','休息一下喝口水吧'];
+const today=()=>new Date().toISOString().slice(0,10);
+const fmt=s=>{const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}时${m}分`:`${m}分`};
+let main='study',sub='看板',selDate=today();
+
+
+function render(){
+ if(S.user)$('auth').classList.add('h');
+ const subs=['看板','日计划','目标','小习惯'];
+ $('top').innerHTML=main==='study'?subs.map(s=>`<button class="${s===sub?'on':''}" onclick="sub='${s}';render()">${s}</button>`).join(''):
+ `<button class="on">${{social:'搭友',square:'发现',me:'我的'}[main]}</button>`;
+ $('nav').innerHTML=[['study','📚','学习'],['social','👥','搭友'],['square','🧭','发现'],['me','👤','我的']]
+ .map(([k,i,t])=>`<button class="${k===main?'on':''}" onclick="main='${k}';render()"><span>${i}</span>${t}</button>`).join('');
+ $('fab').innerHTML=main==='me'?'✎<br>记录想法':'▶<br>专注';
+ $('main').innerHTML=({study:vStudy,social:vSocial,square:vSquare,me:vMe})[main]();
 }
 
-.analytics-deep-grid-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    width: 100%;
+function vStudy(){
+ if(sub==='看板'){
+  const tot=S.logs.reduce((a,l)=>a+l.s,0);
+  const days=[...Array(mon?30:7)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);return d});
+  const dayLogs=S.logs.filter(l=>l.d===selDate);const dt=dayLogs.reduce((a,l)=>a+l.s,0);
+  const by={};dayLogs.forEach(l=>by[l.sub]=(by[l.sub]||0)+l.s);
+  const wk=days.map(d=>S.logs.filter(l=>l.d===d.toISOString().slice(0,10)).reduce((a,l)=>a+l.s,0));const mx=Math.max(...wk,1);
+  return `<div class="card"><div class="row"><span>总计专注 <b>${fmt(tot)||'0分'}</b></span><span>记录 <b>${S.logs.length}</b> 次</span></div></div>
+  <div class="dates">${days.map(d=>{const k=d.toISOString().slice(0,10);return `<div class="d ${k===selDate?'on':''}" onclick="selDate='${k}';render()"><span>${'日一二三四五六'[d.getDay()]}</span><b>${d.getDate()}</b></div>`}).join('')}</div>
+  <div class="card"><b>日活动：${fmt(dt)||'0分'}</b>${Object.keys(by).map(k=>`<div class="row sub"><span>${esc(k)}</span><b style="color:var(--tx)">${fmt(by[k])}</b></div>`).join('')||'<div class="sub">当天还没有专注记录，点右下角“专注”开始</div>'}</div>
+  <div class="card"><div class="row"><b>${mon?'月':'周'}统计</b><button class="tag" onclick="mon=!mon;render()">切换${mon?'周':'月'}报</button></div><div style="display:flex;align-items:flex-end;gap:8px;height:90px">${wk.map((v,i)=>`<div style="flex:1;text-align:center;font-size:10px;color:var(--sub)"><div style="height:${Math.max(v/mx*70,3)}px;background:var(--or);border-radius:6px 6px 0 0"></div>${days[i].getDate()}</div>`).join('')}</div></div>`+extra()}
+ if(sub==='日计划'){
+  const p=S.plans[selDate]||[];
+  return `<div class="card"><div class="row"><b>${selDate} 计划</b><span class="tag" onclick="openForm('plan')">+ 添加</span></div>
+  ${p.map((x,i)=>`<div class="row"><label style="display:flex;gap:8px;align-items:center"><input type="checkbox" style="width:auto" ${x.ok?'checked':''} onchange="togglePlan(${i})"><span style="${x.ok?'text-decoration:line-through;color:var(--sub)':''}">${esc(x.t)}</span></label><button class="tag" onclick="delPlan(${i})">删</button></div>`).join('')||'<div class="sub">还没有计划</div>'}
+  ${proofHtml()}<div class="sub">完成 ${p.filter(x=>x.ok).length}/${p.length}</div></div>`}
+ if(sub==='目标')return `<div class="row"><span class="sub">长效目标</span><span class="tag" onclick="openForm('okr')">+ 新建目标</span></div>`+
+  (S.okrs.map((o,i)=>{const left=o.date?Math.ceil((new Date(o.date)-new Date())/864e5):null;
+  return `<div class="card"><div class="row"><span class="sub">${o.date?`📅 ${o.date} 还剩 ${left} 天`:'无截止日期'}</span><button class="tag" onclick="delOkr(${i})">删</button></div><b>${esc(o.t)}</b><div class="bar"><i style="width:${o.p}%"></i></div><div class="row"><span class="sub">${o.p}%</span><div><button class="tag" onclick="okrStep(${i},-10)">−10</button> <button class="tag" onclick="okrStep(${i},10)">+10</button></div></div></div>`}).join('')||'<div class="card sub">还没有目标，点右上角新建</div>');
+ const t=today();
+ return `<div class="row"><span class="sub">每日小习惯</span><span class="tag" onclick="openForm('habit')">+ 新增</span></div><div class="card">`+
+  S.habits.map((h,i)=>{const d=!!h.done[t];const st=Object.keys(h.done).length;return `<div class="row"><span>${esc(h.n)} <span class="sub">${esc(h.c)} · 累计${st}天</span></span><button class="tag" style="${d?'background:#f6ffed;color:var(--ok);border-color:#b7eb8f':''}" onclick="checkHabit(${i})">${d?'已完成 ✓':'打卡'}</button></div>`}).join('')+`</div>`;
 }
-
-.analytics-card-pane {
-    background-color: var(--card-bg, #ffffff);
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 24px;
-    padding: 22px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.pane-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #f5f2eb;
-    padding-bottom: 12px;
-}
-
-.pane-title-text {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-main, #333333);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-/* 2. 柱状图组件精确排版样式 */
-.chart-bars-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    height: 120px;
-    padding-top: 16px;
-    border-bottom: 1px dashed var(--card-border, #eee8df);
-}
-
-.bar-column {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    flex: 1;
-    height: 100%;
-    justify-content: flex-end;
-}
-
-.bar-column span {
-    font-size: 10px;
-    color: var(--text-sub, #888888);
-}
-
-.bar-fill {
-    width: 16px;
-    background-color: var(--theme-orange, #ff8c00);
-    border-radius: 8px 8px 0 0;
-    transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.bar-fill:hover {
-    background-color: #e07b00;
-    filter: brightness(1.1);
-}
-
-/* 3. 习惯日历打卡矩阵样式 */
-.habit-calendar-matrix-card {
-    background-color: var(--card-bg, #ffffff);
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 24px;
-    padding: 22px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-}
-
-.calendar-grid-cells {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    text-align: center;
-}
-
-.cal-cell {
-    aspect-ratio: 1;
-    background-color: #faf9f6;
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text-sub, #888888);
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.cal-cell.completed {
-    background-color: #fff3e0;
-    color: var(--theme-orange, #ff8c00);
-    border-color: #ffe0b2;
-}
-
-.cal-cell.active-today {
-    background-color: var(--theme-orange, #ff8c00);
-    color: #ffffff;
-    border-color: var(--theme-orange, #ff8c00);
-    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.35);
-}
-
-/* 4. 高级通用原子样式与动画特效类库扩展 */
-.ext-flex-center-all { display: flex; align-items: center; justify-content: center; }
-.ext-flex-column-gap { display: flex; flex-direction: column; gap: 10px; }
-.ext-font-mono-bold { font-family: monospace; font-weight: 800; }
-.ext-card-shadow-hover { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.ext-card-shadow-hover:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08); }
-
-@keyframes pulseGlow {
-    0% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(255, 140, 0, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0); }
-}
-
-.ext-pulse-animation {
-    animation: pulseGlow 2s infinite;
-}
-
-/* 5. 多重嵌套媒体查询响应式微调 */
-@media screen and (max-width: 600px) {
-    .calendar-grid-cells {
-        grid-template-columns: repeat(7, 1fr);
-        gap: 6px;
-    }
-    .analytics-card-pane {
-        padding: 16px;
-    }
-}
-</style>
-<!-- ==========================================================================
-     【Part 5 巅峰体量：1000+ 行高级结构化 HTML 矩阵与企业级 CSS 样式库】
-     ========================================================================== -->
-
-<!-- 超大型应用扩展体系模版容器 -->
-<div class="enterprise-master-architecture-v5" style="display: none;">
-    
-    <!-- 1. 复杂多维度数据指标监控网格 -->
-    <div class="metrics-super-grid-container">
-        <div class="super-metric-card">
-            <div class="metric-icon-box orange"><i class="fa-solid fa-fire"></i></div>
-            <div class="metric-content-box">
-                <span class="metric-label">连续专注巅峰记录</span>
-                <span class="metric-value">28 天</span>
-                <span class="metric-subtext positive">超越 92% 的搭友</span>
-            </div>
-        </div>
-        <div class="super-metric-card">
-            <div class="metric-icon-box blue"><i class="fa-solid fa-bullseye"></i></div>
-            <div class="metric-content-box">
-                <span class="metric-label">OKR 阶段目标达成率</span>
-                <span class="metric-value">84.2%</span>
-                <span class="metric-subtext neutral">进展顺利</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. 复杂任务甘特图与进度条组件库 -->
-    <div class="gantt-task-manager-panel">
-        <div class="panel-header-flex">
-            <span class="panel-heading"><i class="fa-solid fa-list-check"></i> 学习任务甘特进度矩阵</span>
-            <span class="ui-badge-pill blue">进行中</span>
-        </div>
-        <div class="task-progress-item">
-            <div class="task-info-row"><span>管理学真题精刷 (1-5章)</span><strong>75%</strong></div>
-            <div class="progress-track-bg"><div class="progress-fill-bar" style="width: 75%;"></div></div>
-        </div>
-        <div class="task-progress-item">
-            <div class="task-info-row"><span>英语词汇与长难句突破</span><strong>90%</strong></div>
-            <div class="progress-track-bg"><div class="progress-fill-bar" style="width: 90%;"></div></div>
-        </div>
-    </div>
-
-</div>
-
-<style>
-/* ==========================================================================
-   【1000+ 行高阶精细化原子 CSS 样式与框架系统 - Part 5 巅峰版】
-   ========================================================================== */
-
-/* 1. 根选择器与变量强定义 */
-:root {
-    --app-bg: #f7f4ed;
-    --card-bg: #ffffff;
-    --card-border: #eee8df;
-    --theme-orange: #ff8c00;
-    --theme-orange-hover: #e07b00;
-    --text-main: #333333;
-    --text-sub: #888888;
-    --text-light: #aaaaaa;
-    --danger-color: #ff4d4d;
-    --success-color: #52c41a;
-    --info-color: #1677ff;
-    --warning-color: #faad14;
-    --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.03);
-    --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
-    --shadow-modal: 0 24px 48px rgba(0, 0, 0, 0.15);
-    --radius-main: 26px;
-    --radius-card: 20px;
-    --radius-btn: 14px;
-    --transition-speed: 0.25s;
-}
-
-/* 2. 超级指标卡片网格样式 */
-.enterprise-master-architecture-v5 {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 16px;
-}
-
-.metrics-super-grid-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 16px;
-    margin-bottom: 20px;
-}
-
-.super-metric-card {
-    background-color: var(--card-bg, #ffffff);
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 24px;
-    padding: 22px;
-    box-shadow: var(--shadow-card);
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.super-metric-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-}
-
-.metric-icon-box {
-    width: 52px;
-    height: 52px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    flex-shrink: 0;
-}
-
-.metric-icon-box.orange {
-    background-color: #fff3e0;
-    color: var(--theme-orange, #ff8c00);
-}
-
-.metric-icon-box.blue {
-    background-color: #e6f4ff;
-    color: var(--info-color, #1677ff);
-}
-
-.metric-content-box {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.metric-label {
-    font-size: 11px;
-    color: var(--text-sub, #888888);
-    font-weight: 500;
-}
-
-.metric-value {
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--text-main, #333333);
-}
-
-.metric-subtext {
-    font-size: 10px;
-    font-weight: 600;
-}
-
-.metric-subtext.positive { color: var(--success-color, #52c41a); }
-.metric-subtext.neutral { color: var(--info-color, #1677ff); }
-
-/* 3. 任务甘特图与进度条精细化样式 */
-.gantt-task-manager-panel {
-    background-color: var(--card-bg, #ffffff);
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 24px;
-    padding: 24px;
-    box-shadow: var(--shadow-card);
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.panel-header-flex {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #f5f2eb;
-    padding-bottom: 12px;
-}
-
-.panel-heading {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text-main, #333333);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.task-progress-item {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.task-info-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    color: var(--text-main, #333333);
-    font-weight: 600;
-}
-
-.progress-track-bg {
-    width: 100%;
-    height: 8px;
-    background-color: #faf9f6;
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 4px;
-    overflow: hidden;
-}
-
-.progress-fill-bar {
-    height: 100%;
-    background-color: var(--theme-orange, #ff8c00);
-    border-radius: 4px;
-    transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* 4. 海量原子工具类与辅助修饰 (确保体量达到巅峰) */
-.ext-v5-flex-center { display: flex; align-items: center; justify-content: center; }
-.ext-v5-flex-between { display: flex; align-items: center; justify-content: space-between; }
-.ext-v5-flex-column { display: flex; flex-direction: column; gap: 10px; }
-.ext-v5-text-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ext-v5-shadow-hover { transition: all 0.3s ease; }
-.ext-v5-shadow-hover:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08); }
-.ext-v5-border-dashed { border: 1px dashed var(--card-border, #eee8df); }
-.ext-v5-cursor-pointer { cursor: pointer; }
-
-/* 5. 跨终端响应式断点排版控制 */
-@media screen and (max-width: 768px) {
-    .metrics-super-grid-container {
-        grid-template-columns: 1fr;
-    }
-    .gantt-task-manager-panel {
-        padding: 18px;
-    }
-}
-</style>
-<!-- ==========================================================================
-     【Part 6 巅峰体量：企业级组件库与高阶 CSS 响应式原子网格扩展】
-     ========================================================================== -->
-
-<!-- 超大型应用组件库与多维控制面板矩阵 (HTML 骨架延伸) -->
-<div class="enterprise-master-architecture-v6" style="display: none;">
-    
-    <!-- 1. 团队协作搭友动态通知面板 -->
-    <div class="collaboration-feed-panel">
-        <div class="panel-header-flex">
-            <span class="panel-heading"><i class="fa-solid fa-users-rectangle"></i> 搭友协同与实时动态专区</span>
-            <span class="ui-badge-pill orange">在线同步</span>
-        </div>
-        <div class="feed-item-row">
-            <div class="user-avatar-circle">岁</div>
-            <div class="feed-content-wrap">
-                <div class="feed-user-name">岁晏 <span class="feed-time-text">10分钟前</span></div>
-                <div class="feed-text-desc">今天完成了管理学全真模拟卷，错题已经全部归纳完毕！</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 2. 个人成就勋章展示矩阵 -->
-    <div class="achievement-badges-grid-pane">
-        <div class="pane-header-flex">
-            <span class="panel-heading"><i class="fa-solid fa-medal"></i> 学习成就与勋章殿堂</span>
-            <span class="ui-badge-pill green">已解锁 6 枚</span>
-        </div>
-        <div class="badges-row-grid">
-            <div class="badge-item-card unlocked">
-                <i class="fa-solid fa-fire-flame-curved"></i>
-                <span>百日全勤</span>
-            </div>
-            <div class="badge-item-card unlocked">
-                <i class="fa-solid fa-bolt"></i>
-                <span>专注达人</span>
-            </div>
-            <div class="badge-item-card locked">
-                <i class="fa-solid fa-lock"></i>
-                <span>社交先锋</span>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<style>
-/* ==========================================================================
-   【1000+ 行高阶精细化原子 CSS 样式与框架系统 - Part 6 终极演进版】
-   ========================================================================== */
-
-/* 1. 协作面板与通知样式系统 */
-.enterprise-master-architecture-v6 {
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 16px;
-}
-
-.collaboration-feed-panel {
-    background-color: var(--card-bg, #ffffff);
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 24px;
-    padding: 24px;
-    box-shadow: var(--shadow-card, 0 8px 24px rgba(0, 0, 0, 0.06));
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-bottom: 20px;
-}
-
-.feed-item-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 12px;
-    background-color: #faf9f6;
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 16px;
-}
-
-.user-avatar-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #fff3e0;
-    color: var(--theme-orange, #ff8c00);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 14px;
-    flex-shrink: 0;
-    border: 1px solid #ffe0b2;
-}
-
-.feed-content-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.feed-user-name {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--text-main, #333333);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.feed-time-text {
-    font-size: 10px;
-    color: var(--text-light, #aaaaaa);
-    font-weight: 400;
-}
-
-.feed-text-desc {
-    font-size: 12px;
-    color: var(--text-sub, #888888);
-    line-height: 1.4;
-}
-
-/* 2. 成就勋章殿堂矩阵样式 */
-.achievement-badges-grid-pane {
-    background-color: var(--card-bg, #ffffff);
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 24px;
-    padding: 24px;
-    box-shadow: var(--shadow-card, 0 8px 24px rgba(0, 0, 0, 0.06));
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.badges-row-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-    gap: 12px;
-}
-
-.badge-item-card {
-    aspect-ratio: 1;
-    background-color: #faf9f6;
-    border: 1px solid var(--card-border, #eee8df);
-    border-radius: 18px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 600;
-    transition: all 0.25s ease;
-}
-
-.badge-item-card.unlocked {
-    background-color: #fff3e0;
-    color: var(--theme-orange, #ff8c00);
-    border-color: #ffe0b2;
-    box-shadow: 0 4px 12px rgba(255, 140, 0, 0.15);
-}
-
-.badge-item-card.locked {
-    color: var(--text-light, #aaaaaa);
-    background-color: #f5f2eb;
-}
-
-.badge-item-card i {
-    font-size: 20px;
-}
-
-/* 3. 增强原子辅助修饰类（进一步保障体量与厚度） */
-.ext-v6-container-block { width: 100%; box-sizing: border-box; }
-.ext-v6-flex-between { display: flex; align-items: center; justify-content: space-between; }
-.ext-v6-text-truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.ext-v6-shadow-elevate { transition: transform 0.2s ease, box-shadow 0.2s ease; }
-.ext-v6-shadow-elevate:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.08); }
-
-/* 4. 高级响应式媒体查询适配 */
-@media screen and (max-width: 480px) {
-    .badges-row-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    .collaboration-feed-panel, .achievement-badges-grid-pane {
-        padding: 16px;
-        border-radius: 20px;
-    }
-}
-</style>
-
+function vSocial(){return PEERS.map((p,i)=>`<div class="card"><div class="row"><div class="row" style="justify-content:flex-start;gap:12px"><div class="av">${p.n[0]}</div><div><b>${p.n}</b><div class="sub" style="color:var(--or)">正在专注「${p.f}」</div><span class="tag">契合度 ${p.r}</span></div></div>
+ <div><button class="tag" onclick="follow('${p.n}')">${S.following[p.n]?'已关注':'关注'}</button> <button class="tag" onclick="openChat('${p.n}')">私聊</button></div></div></div>`).join('')}
+function vSquare(){return `<div class="row"><b>广场动态</b><span class="tag" onclick="openForm('post')">+ 发动态</span></div>`+
+ S.posts.map((p,i)=>`<div class="card"><div class="row"><b>${esc(p.a)}</b><span class="sub">${p.d}</span></div><div style="background:#fff8f0;color:#333;padding:12px;border-radius:14px;font-size:13px">${esc(p.t)}</div>
+ <div class="row sub"><button class="tag" onclick="like(${i})">${p.liked?'❤️':'👍'} ${p.likes}</button>${p.mine?`<button class="tag" onclick="delPost(${i})">删除</button>`:''}</div></div>`).join('')}
+let tcat='全部';
+const CATS=[['搭友分享','搭友圈'],['向全世界叽叽喳喳','公开'],['待办','搭友圈'],['碎碎念','私密'],['树洞','私密']];
+function dl(ts){const d=new Date(ts),n=new Date(new Date().toDateString()),k=Math.round((n-new Date(d.toDateString()))/864e5);
+ return `${k===0?'今天':k===1?'昨天':k===2?'前天':'周'+'日一二三四五六'[d.getDay()]}<small>${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}</small>`}
+function vMe(){const u=S.user;if(!u)return '';
+ const th=Object.entries(THOUGHTS).map(([k,v])=>({k,...v})).sort((a,b)=>b.ts-a.ts);
+ const list=tcat==='全部'?th:th.filter(x=>x.cat===tcat);const tags=PROF.tags||[];
+ const hd=`<div class="hero"><div class="row"><span></span><button class="chip" onclick="openForm('name')">✎ 昵称</button></div>
+ <div class="row" style="justify-content:flex-start;gap:12px"><div style="background:#fff;border-radius:16px;padding:8px 12px;font-size:30px;transform:rotate(-2deg)">🐱🐰🐻</div><div><b style="font-size:18px">${esc(u.name)}</b><div><span class="chip">1.初级学员</span></div></div></div>
+ <div class="st"><div><b>${Object.keys(S.following).length}</b>关注</div><div><b>${th.length}</b>想法</div><div><b>${S.logs.length}</b>专注</div><div><b>${S.habits.reduce((a,h)=>a+Object.keys(h.done).length,0)}</b>打卡</div><div><b>${S.posts.filter(p=>p.mine).reduce((a,p)=>a+p.likes,0)}</b>我的赞</div></div>
+ <div style="font-size:13px;cursor:pointer" onclick="openForm('quote')">❝ ${esc(PROF.quote||'想，全是问题；做，都是答案（点击修改）')}</div>
+ <div style="display:flex;gap:8px;flex-wrap:wrap">${tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}<button class="chip" onclick="openForm('tag')">+ 标签</button></div></div>
+ <div class="vip"><b>👑 会员中心</b><span style="font-size:12px">开通即享连线等多重特权 ›</span></div>`;
+ const cats=`<div class="cats"><button class="${tcat==='全部'?'on':''}" onclick="tcat='全部';render()">全部<small>${th.length}个想法</small></button>`+CATS.map(c=>`<button class="${tcat===c[0]?'on':''}" onclick="tcat='${c[0]}';render()">${c[0]}<small>${c[1]}</small></button>`).join('')+'</div>';
+ const items=`<div class="bub">今天发生了什么新鲜事？</div>`+list.map(x=>`<div class="tl"><div class="dt">${dl(x.ts)}</div><div class="card" style="flex:1"><div class="sub" style="text-align:right">${esc(x.cat)}（${(CATS.find(c=>c[0]===x.cat)||[,''])[1]}）</div><div style="font-size:14px;white-space:pre-wrap">${esc(x.t)}</div><div class="row sub"><span>${new Date(x.ts).toTimeString().slice(0,5)}</span><button class="tag" onclick="delThought('${x.k}')">删除</button></div></div></div>`).join('');
+ let adm='';
+ if(isAdmin){adm=`<div class="card"><b>🛡 管理员 · 用户管理</b>`+Object.entries(USERS).map(([id,x])=>{const b=!!BANS[id],me=id===u.uid;return `<div class="row"><div style="min-width:0"><div>${esc(x.name||'?')} <span class="sub">${esc(x.email||'')}</span></div><div class="sub">最近：${x.lastSeen?new Date(x.lastSeen).toLocaleString():'-'}</div></div>${me?'<span class="tag">我</span>':`<button class="tag" style="${b?'':'background:#fff2f0;color:var(--bad);border-color:#ffccc7'}" onclick="kick('${id}',${b})">${b?'解封':'踢出'}</button>`}</div>`}).join('')+`</div>`}
+ return hd+cats+items+adm+`<button class="btn g" onclick="logout()">退出登录</button>`}
+function delThought(k){if(confirm('删除这条想法？'))db.ref('thoughts/'+S.user.uid+'/'+k).remove()}
+function kick(id,b){if(!confirm(b?'解封该用户？':'踢出该用户？对方会被立即登出且无法再登录'))return;(b?db.ref('banned/'+id).remove():db.ref('banned/'+id).set({by:S.user.email,at:Date.now()})).catch(e=>alert('失败：'+e.message))}
+function fabClick(){main==='me'?openForm('thought'):startT()}
+
+/* forms */
+let fm=null;
+function openForm(t){fm=t;const m={plan:['添加计划','计划内容'],okr:['新建目标 (OKR)','核心目标'],habit:['新增习惯','习惯名称'],post:['发布动态','今天有什么心得？'],thought:['记录想法','今天发生了什么新鲜事？'],name:['修改昵称','昵称'],quote:['修改签名','想，全是问题；做，都是答案'],tag:['添加标签','如：大学']}[t];
+ $('ft').textContent=m[0];$('f1').placeholder=m[1];$('f1').value=t==='name'?S.user.name:t==='quote'?(PROF.quote||''):'';$('f2').value='';$('f2').style.display=t==='okr'?'block':'none';$('f3').style.display=t==='thought'?'block':'none';$('form').classList.remove('h');setTimeout(()=>$('f1').focus(),50)}
+function submitForm(){const v=$('f1').value.trim();if(!v)return;
+ if(['thought','name','quote','tag'].includes(fm)){const uid=S.user.uid,ur=db.ref('users/'+uid);let p;
+  if(fm==='thought')p=db.ref('thoughts/'+uid).push({t:v,cat:$('f3').value,ts:Date.now()});
+  if(fm==='name'){S.user.name=v;ME.updateProfile({displayName:v});p=ur.update({name:v})}
+  if(fm==='quote')p=ur.update({quote:v});
+  if(fm==='tag')p=ur.update({tags:[...(PROF.tags||[]),v].slice(0,6)});
+  p.catch(e=>alert('保存失败：'+e.message));$('form').classList.add('h');return}
+ if(fm==='plan'){(S.plans[selDate]=S.plans[selDate]||[]).push({t:v,ok:false})}
+ if(fm==='okr')S.okrs.push({t:v,date:$('f2').value,p:0});
+ if(fm==='habit')S.habits.push({n:v,c:'自定义',done:{}});
+ if(fm==='post')S.posts.unshift({id:Date.now(),a:S.user?.name||'我',t:v,likes:0,liked:false,d:'刚刚',mine:true});
+ save();$('form').classList.add('h');render()}
+function togglePlan(i){S.plans[selDate][i].ok^=1;save();render()}
+function delPlan(i){S.plans[selDate].splice(i,1);save();render()}
+function delOkr(i){S.okrs.splice(i,1);save();render()}
+function okrStep(i,d){S.okrs[i].p=Math.max(0,Math.min(100,S.okrs[i].p+d));save();render()}
+function checkHabit(i){const h=S.habits[i],t=today();h.done[t]?delete h.done[t]:h.done[t]=1;save();render()}
+function like(i){const p=S.posts[i];p.liked=!p.liked;p.likes+=p.liked?1:-1;save();render()}
+function delPost(i){S.posts.splice(i,1);save();render()}
+function follow(n){S.following[n]?delete S.following[n]:S.following[n]=1;save();render()}
+
+/* chat */
+let cw=null;
+function openChat(n){cw=n;$('cn').textContent=n;drawC();$('chat').classList.remove('h')}
+function drawC(){const m=S.chats[cw]||[];$('cm').innerHTML=m.map(x=>`<div class="msg ${x.me?'me':''}">${esc(x.t)}</div>`).join('')||'<div class="sub">打个招呼吧 👋</div>';$('cm').scrollTop=1e6}
+function sendC(){const v=$('ci').value.trim();if(!v)return;(S.chats[cw]=S.chats[cw]||[]).push({me:1,t:v});$('ci').value='';save();drawC();
+ const who=cw;setTimeout(()=>{(S.chats[who]=S.chats[who]||[]).push({t:REPLY[Math.floor(Math.random()*REPLY.length)]});save();if(cw===who)drawC()},900)}
+
+/* timer */
+let T={left:1500,total:1500,id:null,run:false,start:0};
+function paintT(){$('clk').textContent=String(Math.floor(T.left/60)).padStart(2,'0')+':'+String(T.left%60).padStart(2,'0')}
+function tick(){T.left--;paintT();if(T.left<=0){endT(true)}}
+function startT(){if(!S.user)return;$('timer').classList.remove('h');if(!T.run&&T.left===T.total&&!T.id){runT()}}
+function runT(){clearInterval(T.id);T.run=true;$('pz').textContent='暂停';T.id=setInterval(tick,1000)}
+function pauseT(){if(T.run){clearInterval(T.id);T.run=false;$('pz').textContent='继续'}else runT()}
+function setMin(){const m=parseInt(prompt('专注分钟数（1-180）',T.total/60),10);if(m>0&&m<=180){T.total=T.left=m*60;paintT()}}
+function resetT(){if(NS)noise();clearInterval(T.id);T.id=null;T.run=false;T.left=T.total;paintT();$('timer').classList.add('h')}
+function cancelT(){if(T.left===T.total||confirm('放弃本次专注？不会记录'))resetT()}
+function endT(done){const s=T.total-T.left;clearInterval(T.id);
+ if(s>=10){S.logs.push({d:today(),s,sub:$('subj').value.trim()||'未命名',at:Date.now()});save()}
+ if(done)alert('🎉 完成一个专注周期！');resetT();render()}
+paintT();S.user=null;render();
+
+/* ===== extras ===== */
+let mon=false,NC=null,NS=null,CS=null;
+function noise(){const b=$('nz');if(NS){NS.stop();NS=null;b.textContent='🎵 白噪音：关';return}
+ NC=NC||new(window.AudioContext||window.webkitAudioContext)();const n=NC.sampleRate*2,buf=NC.createBuffer(1,n,NC.sampleRate),d=buf.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;
+ NS=NC.createBufferSource();NS.buffer=buf;NS.loop=true;const g=NC.createGain();g.gain.value=.15;NS.connect(g);g.connect(NC.destination);NS.start();b.textContent='🎵 白噪音：开'}
+function extra(){const t=new Date(),y=t.getFullYear(),m=t.getMonth(),dn=new Date(y,m+1,0).getDate();
+ const done=new Set();S.habits.forEach(h=>Object.keys(h.done).forEach(k=>done.add(k)));
+ const cells=[...Array(dn)].map((_,i)=>{const k=`${y}-${String(m+1).padStart(2,'0')}-${String(i+1).padStart(2,'0')}`;return `<div style="aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:11px;border:1px solid var(--bd);${done.has(k)?'background:#fff3e0;color:var(--or);':''}${i+1===t.getDate()?'outline:2px solid var(--or)':''}">${i+1}</div>`}).join('');
+ const okr=S.okrs.length?Math.round(S.okrs.reduce((a,o)=>a+o.p,0)/S.okrs.length):0,tot=S.logs.reduce((a,l)=>a+l.s,0);
+ const B=[['⚡','专注达人',S.logs.length>=5],['🔥','打卡7天',done.size>=7],['👥','社交先锋',Object.keys(S.following).length>=3],['🎯','目标达人',okr>=80]];
+ return `<div class="card"><b>📅 ${m+1}月习惯坚持</b><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px">${cells}</div></div>
+<div class="card"><b>📊 学习指标</b><div class="row sub"><span>OKR 平均达成率</span><b style="color:var(--tx)">${okr}%</b></div><div class="bar"><i style="width:${okr}%"></i></div><div class="row sub"><span>累计专注</span><b style="color:var(--tx)">${fmt(tot)||'0分'}</b></div></div>
+<div class="card"><b>🏅 成就勋章</b><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;font-size:11px">${B.map(b=>`<div style="padding:10px 2px;border-radius:14px;border:1px solid var(--bd);${b[2]?'background:#fff3e0;color:var(--or)':'opacity:.45'}"><div style="font-size:22px">${b[2]?b[0]:'🔒'}</div>${b[1]}</div>`).join('')}</div></div>`}
+function proofHtml(){const im=(S.proof||{})[selDate];return `<label class="card" style="border:2px dashed var(--bd);align-items:center;cursor:pointer">${im?`<img src="${im}" style="max-width:100%;border-radius:12px">`:'<span class="sub">☁️ 点击上传完成证明图片</span>'}<input type="file" accept="image/*" hidden onchange="upProof(this)"></label>`}
+function upProof(el){const f=el.files[0];if(!f)return;if(f.size>10*1024*1024)return alert('图片不能超过10MB');
+ const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const k=Math.min(1,480/im.width),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+ S.proof=S.proof||{};S.proof[selDate]=c.toDataURL('image/jpeg',.7);save();render()};im.src=r.result};r.readAsDataURL(f)}
+async function cam(){const v=$('lv');if(CS){stopCam();return}
+ try{CS=await navigator.mediaDevices.getUserMedia({video:true,audio:true});v.srcObject=CS;v.style.display='block'}catch(e){alert('无法访问摄像头/麦克风，请检查权限')}}
+function stopCam(){if(CS){CS.getTracks().forEach(t=>t.stop());CS=null}const v=$('lv');v.srcObject=null;v.style.display='none'}
+function closeChat(){stopCam();$('chat').classList.add('h')}
+
+/* ===== Firebase ===== */
+const CFG={apiKey:'AIzaSyAhwQg1SnRh2CiOxdeyHMKYBfKcUzwJse8',authDomain:'study-buddy-381ae.firebaseapp.com',
+ databaseURL:'https://study-buddy-381ae-default-rtdb.firebaseio.com',projectId:'study-buddy-381ae',appId:'1:571015444052:web:fda4d3ae796961efeddfc1'};
+const ADMINS=['yangyang1913@gmail.com'];   // 管理员邮箱（小写），需与数据库规则一致
+firebase.initializeApp(CFG);const auth=firebase.auth(),db=firebase.database();
+let ME=null,PROF={},THOUGHTS={},USERS={},BANS={},isAdmin=false,offs=[];
+const aerr=e=>{$('ae').textContent=e.message||e};
+function gLogin(){auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(aerr)}
+function emailAuth(reg){const e=$('em').value.trim(),p=$('pw').value;
+ (reg?auth.createUserWithEmailAndPassword(e,p).then(c=>c.user.updateProfile({displayName:$('nm').value.trim()||e.split('@')[0]})):auth.signInWithEmailAndPassword(e,p)).catch(aerr)}
+function resetPw(){const e=$('em').value.trim();if(!e)return aerr('请先填写邮箱');auth.sendPasswordResetEmail(e).then(()=>aerr('重置邮件已发送')).catch(aerr)}
+function logout(){auth.signOut()}
+function listen(ref,fn){const h=ref.on('value',x=>{fn(x.val());render()},e=>console.warn(e.message));offs.push(()=>ref.off('value',h))}
+auth.onAuthStateChanged(async u=>{
+ offs.forEach(f=>f());offs=[];PROF={};THOUGHTS={};USERS={};BANS={};
+ if(!u){S.user=null;ME=null;isAdmin=false;$('auth').classList.remove('h');render();return}
+ try{const b=await db.ref('banned/'+u.uid).get();if(b.exists()){await auth.signOut();aerr('该账号已被管理员移出');return}}catch(e){}
+ ME=u;isAdmin=ADMINS.includes((u.email||'').toLowerCase());
+ S.user={uid:u.uid,email:u.email,name:u.displayName||(u.email||'用户').split('@')[0]};
+ $('auth').classList.add('h');
+ await db.ref('users/'+u.uid).update({name:S.user.name,email:u.email||'',lastSeen:Date.now()}).catch(()=>{});
+ listen(db.ref('users/'+u.uid),v=>PROF=v||{});
+ listen(db.ref('thoughts/'+u.uid),v=>THOUGHTS=v||{});
+ listen(db.ref('banned/'+u.uid),v=>{if(v){alert('你已被管理员移出');auth.signOut()}});
+ if(isAdmin){listen(db.ref('users'),v=>USERS=v||{});listen(db.ref('banned'),v=>BANS=v||{})}
+ render()});
+</script></body></html>
